@@ -19,7 +19,7 @@ interface TabBarProps {
 interface TabBarItem {
   id: TabId;
   label: string;
-  Icon: React.ComponentType<{ className?: string }>;
+  Icon: React.ElementType;
   ariaLabel: string;
 }
 
@@ -95,8 +95,8 @@ const TabBar: React.FC<TabBarProps> = ({ activeTab, onTabChange, darkMode }) => 
                         ? '#60a5fa'
                         : '#3b82f6'
                       : darkMode
-                      ? '#9ca3af'
-                      : '#6b7280',
+                        ? '#9ca3af'
+                        : '#6b7280',
                     transform: isActive ? 'scale(1.1)' : 'scale(1)',
                   }}
                   aria-hidden="true"
@@ -123,8 +123,8 @@ const TabBar: React.FC<TabBarProps> = ({ activeTab, onTabChange, darkMode }) => 
                       ? '#60a5fa'
                       : '#3b82f6'
                     : darkMode
-                    ? '#9ca3af'
-                    : '#6b7280',
+                      ? '#9ca3af'
+                      : '#6b7280',
                   fontWeight: isActive ? '600' : '500',
                 }}
               >

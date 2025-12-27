@@ -5,7 +5,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Play, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+
 
 interface NewGameModalProps {
   isOpen: boolean;

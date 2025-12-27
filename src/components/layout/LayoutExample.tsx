@@ -22,7 +22,15 @@ const LayoutExample: React.FC = () => {
     name: 'Soirée du vendredi',
     date: new Date().toISOString(),
     startTime: new Date(Date.now() - 1000 * 60 * 45).toISOString(), // Started 45 minutes ago
-    numbers: [12, 45, 67, 23, 89, 34, 56, 78, 90, 1, 23, 45], // Example: 12 numbers drawn
+    manches: [
+      {
+        id: 'mock-manche-1',
+        mancheNumber: 1,
+        startTime: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+        numbers: [12, 45, 67, 23, 89, 34, 56, 78, 90, 1, 23, 45],
+        isActive: true,
+      },
+    ],
     isActive: true,
   };
 

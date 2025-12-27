@@ -22,8 +22,14 @@ const PartyDetails: React.FC<PartyDetailsProps> = ({
   onClose,
   darkMode = false,
 }) => {
-  const numbersDrawn = game.numbers.length;
-  const totalNumbers = 90;
+  const allNumbers = useMemo(() => {
+    return [...game.manches]
+      .sort((a, b) => a.mancheNumber - b.mancheNumber)
+      .flatMap((m) => m.numbers);
+  }, [game.manches]);
+
+  const numbersDrawn = allNumbers.length;
+  const totalNumbers = 90 * Math.max(1, game.manches.length);
   const progress = (numbersDrawn / totalNumbers) * 100;
 
   const duration = game.endTime
@@ -59,7 +65,7 @@ const PartyDetails: React.FC<PartyDetailsProps> = ({
     ];
 
     return decades.map((decade) => {
-      const count = game.numbers.filter(
+      const count = allNumbers.filter(
         (num) => num >= decade.min && num <= decade.max
       ).length;
       const percentage = numbersDrawn > 0 ? (count / numbersDrawn) * 100 : 0;
@@ -69,16 +75,16 @@ const PartyDetails: React.FC<PartyDetailsProps> = ({
         percentage,
       };
     });
-  }, [game.numbers, numbersDrawn]);
+  }, [allNumbers, numbersDrawn]);
 
   // Group numbers into rows of 10 for display
   const numbersGrid = useMemo(() => {
     const grid: number[][] = [];
-    for (let i = 0; i < game.numbers.length; i += 10) {
-      grid.push(game.numbers.slice(i, i + 10));
+    for (let i = 0; i < allNumbers.length; i += 10) {
+      grid.push(allNumbers.slice(i, i + 10));
     }
     return grid;
-  }, [game.numbers]);
+  }, [allNumbers]);
 
   const handleExport = () => {
     if (onExport) {

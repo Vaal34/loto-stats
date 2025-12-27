@@ -17,7 +17,15 @@ const PartiesExample: React.FC = () => {
       date: '2025-12-27',
       startTime: '2025-12-27T19:00:00Z',
       endTime: '2025-12-27T21:30:00Z',
-      numbers: [12, 45, 67, 23, 89, 34, 56, 78, 90, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+      manches: [
+        {
+          id: 'manche-1-1',
+          mancheNumber: 1,
+          startTime: '2025-12-27T19:00:00Z',
+          numbers: [12, 45, 67, 23, 89, 34, 56, 78, 90, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+          isActive: false,
+        }
+      ],
       isActive: false,
     },
     {
@@ -25,7 +33,15 @@ const PartiesExample: React.FC = () => {
       name: 'Partie du samedi',
       date: '2025-12-28',
       startTime: '2025-12-28T20:00:00Z',
-      numbers: [15, 25, 35, 45, 55, 65, 75, 85],
+      manches: [
+        {
+          id: 'manche-2-1',
+          mancheNumber: 1,
+          startTime: '2025-12-28T20:00:00Z',
+          numbers: [15, 25, 35, 45, 55, 65, 75, 85],
+          isActive: true,
+        }
+      ],
       isActive: true,
     },
     {
@@ -34,7 +50,15 @@ const PartiesExample: React.FC = () => {
       date: '2025-12-20',
       startTime: '2025-12-20T18:00:00Z',
       endTime: '2025-12-20T23:00:00Z',
-      numbers: Array.from({ length: 90 }, (_, i) => i + 1), // All numbers
+      manches: [
+        {
+          id: 'manche-3-1',
+          mancheNumber: 1,
+          startTime: '2025-12-20T18:00:00Z',
+          numbers: Array.from({ length: 90 }, (_, i) => i + 1),
+          isActive: false
+        }
+      ],
       isActive: false,
     },
   ]);

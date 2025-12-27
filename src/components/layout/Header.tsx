@@ -85,9 +85,9 @@ const Header: React.FC<HeaderProps> = ({ activeGame, darkMode, onToggleTheme }) 
                     backgroundColor: darkMode ? '#065f46' : '#d1fae5',
                     color: darkMode ? '#34d399' : '#059669',
                   }}
-                  aria-label={`${activeGame.numbers.length} out of 90 numbers drawn`}
+                  aria-label={`${activeGame.manches.reduce((acc, m) => acc + m.numbers.length, 0)} out of 90 numbers drawn`}
                 >
-                  <span>{activeGame.numbers.length}/90</span>
+                  <span>{activeGame.manches.reduce((acc, m) => acc + m.numbers.length, 0)}/90</span>
                 </div>
               </div>
             )}
@@ -100,7 +100,6 @@ const Header: React.FC<HeaderProps> = ({ activeGame, darkMode, onToggleTheme }) 
             style={{
               backgroundColor: darkMode ? '#374151' : '#f3f4f6',
               color: darkMode ? '#fbbf24' : '#f59e0b',
-              focusRingColor: darkMode ? '#60a5fa' : '#3b82f6',
             }}
             aria-label={`Switch to ${darkMode ? 'light' : 'dark'} mode`}
             title={`Switch to ${darkMode ? 'light' : 'dark'} mode`}

@@ -51,7 +51,9 @@ const PartiesList: React.FC<PartiesListProps> = ({
           comparison = a.name.localeCompare(b.name);
           break;
         case 'numbersDrawn':
-          comparison = a.numbers.length - b.numbers.length;
+          const countA = a.manches.reduce((acc, m) => acc + m.numbers.length, 0);
+          const countB = b.manches.reduce((acc, m) => acc + m.numbers.length, 0);
+          comparison = countA - countB;
           break;
       }
 

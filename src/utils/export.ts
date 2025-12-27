@@ -39,7 +39,9 @@ export function downloadJSON(stats: GlobalStats, filename?: string): void {
  * Export single game as CSV
  */
 export function exportGameAsCSV(game: LotoGame): string {
-  const rows: CSVNumberRow[] = game.numbers.map((number, index) => ({
+  const allNumbers = game.manches.flatMap(m => m.numbers);
+  
+  const rows: CSVNumberRow[] = allNumbers.map((number, index) => ({
     gameId: game.id,
     gameName: game.name,
     number,
@@ -60,9 +62,6 @@ export function exportGameAsCSV(game: LotoGame): string {
   return csvRows.join('\n');
 }
 
-/**
- * Download CSV file
- */
 export function downloadCSV(game: LotoGame, filename?: string): void {
   const csv = exportGameAsCSV(game);
   const blob = new Blob([csv], { type: 'text/csv' });
@@ -77,14 +76,14 @@ export function downloadCSV(game: LotoGame, filename?: string): void {
   URL.revokeObjectURL(url);
 }
 
-/**
- * Export all games as CSV
- */
 export function exportAllGamesAsCSV(stats: GlobalStats): string {
   const allRows: CSVNumberRow[] = [];
 
   stats.games.forEach((game) => {
-    game.numbers.forEach((number, index) => {
+    // Iterate through all manches to get numbers
+    const allNumbers = game.manches.flatMap(m => m.numbers);
+    
+    allNumbers.forEach((number, index) => {
       allRows.push({
         gameId: game.id,
         gameName: game.name,

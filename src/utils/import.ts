@@ -2,7 +2,7 @@
  * Import utilities for Loto stats
  */
 
-import { GlobalStats, ExportData, isGlobalStats, ValidationResult } from '../types/game';
+import { GlobalStats, isGlobalStats, ValidationResult } from '../types/game';
 import { MAX_IMPORT_FILE_SIZE } from '../constants/config';
 
 /**
@@ -77,8 +77,11 @@ export function mergeStats(
   // Recalculate frequency
   const allTimeFrequency: Record<number, number> = {};
   mergedGames.forEach((game) => {
-    game.numbers.forEach((num) => {
-      allTimeFrequency[num] = (allTimeFrequency[num] || 0) + 1;
+    // Iterate all numbers from all manches
+    game.manches.forEach((manche) => {
+      manche.numbers.forEach(num => {
+        allTimeFrequency[num] = (allTimeFrequency[num] || 0) + 1;
+      });
     });
   });
 

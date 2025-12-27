@@ -24,8 +24,8 @@ const PartyCard: React.FC<PartyCardProps> = ({
   onDelete,
   darkMode = false,
 }) => {
-  const numbersDrawn = game.numbers.length;
-  const totalNumbers = 90;
+  const numbersDrawn = game.manches.reduce((acc, m) => acc + m.numbers.length, 0);
+  const totalNumbers = 90 * Math.max(1, game.manches.length);
   const progress = (numbersDrawn / totalNumbers) * 100;
 
   const duration = game.endTime

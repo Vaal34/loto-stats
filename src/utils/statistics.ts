@@ -7,6 +7,13 @@ import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 /**
+ * Helper to get all numbers from a game
+ */
+function getAllNumbers(game: LotoGame): number[] {
+  return game.manches.flatMap(m => m.numbers);
+}
+
+/**
  * Calculate game duration in milliseconds
  */
 export function calculateGameDuration(game: LotoGame): number | null {
@@ -46,14 +53,15 @@ export function formatRelativeTime(date: string): string {
  */
 export function getGameSummary(game: LotoGame): GameSummary {
   const duration = calculateGameDuration(game);
+  const numbers = getAllNumbers(game);
 
   return {
     id: game.id,
     name: game.name,
     date: game.date,
-    numbersDrawn: game.numbers.length,
-    totalNumbers: 90,
-    percentage: (game.numbers.length / 90) * 100,
+    numbersDrawn: numbers.length,
+    totalNumbers: 90 * Math.max(1, game.manches.length),
+    percentage: (numbers.length / (90 * Math.max(1, game.manches.length))) * 100,
     duration: duration || undefined,
     isActive: game.isActive,
   };
@@ -65,7 +73,7 @@ export function getGameSummary(game: LotoGame): GameSummary {
 export function calculateAverageNumbersPerGame(games: LotoGame[]): number {
   if (games.length === 0) return 0;
 
-  const total = games.reduce((sum, game) => sum + game.numbers.length, 0);
+  const total = games.reduce((sum, game) => sum + getAllNumbers(game).length, 0);
   return total / games.length;
 }
 
@@ -91,7 +99,7 @@ export function calculateAverageDuration(games: LotoGame[]): number {
 export function findCommonNumbers(games: LotoGame[]): number[] {
   if (games.length === 0) return [];
 
-  const numberSets = games.map((game) => new Set(game.numbers));
+  const numberSets = games.map((game) => new Set(getAllNumbers(game)));
   const firstSet = numberSets[0];
 
   return Array.from(firstSet).filter((num) =>
@@ -107,10 +115,10 @@ export function findUniqueNumbers(
   otherGames: LotoGame[]
 ): number[] {
   const otherNumbers = new Set(
-    otherGames.flatMap((game) => game.numbers)
+    otherGames.flatMap((game) => getAllNumbers(game))
   );
 
-  return targetGame.numbers.filter((num) => !otherNumbers.has(num));
+  return getAllNumbers(targetGame).filter((num) => !otherNumbers.has(num));
 }
 
 /**
@@ -157,9 +165,9 @@ export function sortGames(games: LotoGame[], sortBy: SortOption): LotoGame[] {
     case 'name-desc':
       return sorted.sort((a, b) => b.name.localeCompare(a.name));
     case 'numbers-desc':
-      return sorted.sort((a, b) => b.numbers.length - a.numbers.length);
+      return sorted.sort((a, b) => getAllNumbers(b).length - getAllNumbers(a).length);
     case 'numbers-asc':
-      return sorted.sort((a, b) => a.numbers.length - b.numbers.length);
+      return sorted.sort((a, b) => getAllNumbers(a).length - getAllNumbers(b).length);
     default:
       return sorted;
   }
