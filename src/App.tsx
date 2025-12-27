@@ -14,6 +14,7 @@ import { AUTO_SAVE_INTERVAL, STORAGE_KEY } from './constants/config';
 // Lucide Icons
 import {
   Sun,
+  Dice5,
   Moon,
   Target,
   BarChart3,
@@ -136,7 +137,7 @@ function App() {
         <div className="container flex h-16 items-center justify-between px-4">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <img src="/src/assets/logo.png" alt="Loto Stats Logo" className="h-8 w-8 rounded-lg" />
+              <Dice5 className="h-6 w-6" />
               Loto Stats
             </h1>
             {activeGame && (
