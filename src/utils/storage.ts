@@ -19,6 +19,44 @@ export function initializeGlobalStats(): GlobalStats {
 }
 
 /**
+ * Migrate old data structure to new Partie/Manche structure
+ */
+function migrateToMancheStructure(data: any): GlobalStats {
+  // If data is already in new format, return as is
+  if (data.games && data.games.length > 0 && data.games[0].manches !== undefined) {
+    return data as GlobalStats;
+  }
+
+  // Old format: games have numbers array directly
+  // New format: games have manches array, each manche has numbers
+  const migratedGames = data.games.map((oldGame: any) => ({
+    id: oldGame.id,
+    name: oldGame.name,
+    date: oldGame.date,
+    startTime: oldGame.startTime,
+    endTime: oldGame.endTime,
+    isActive: oldGame.isActive,
+    manches: oldGame.numbers && oldGame.numbers.length > 0
+      ? [
+          {
+            id: `${oldGame.id}-manche-1`,
+            mancheNumber: 1,
+            startTime: oldGame.startTime,
+            endTime: oldGame.endTime,
+            numbers: oldGame.numbers || [],
+            isActive: oldGame.isActive,
+          },
+        ]
+      : [],
+  }));
+
+  return {
+    ...data,
+    games: migratedGames,
+  };
+}
+
+/**
  * Load global stats from localStorage
  */
 export function loadGlobalStats(): GlobalStats {
@@ -31,12 +69,15 @@ export function loadGlobalStats(): GlobalStats {
 
     const parsed = JSON.parse(stored);
 
-    if (!isGlobalStats(parsed)) {
+    // Migrate old data structure if needed
+    const migrated = migrateToMancheStructure(parsed);
+
+    if (!isGlobalStats(migrated)) {
       console.error('Invalid stored data format, initializing new stats');
       return initializeGlobalStats();
     }
 
-    return parsed;
+    return migrated;
   } catch (error) {
     console.error('Error loading stats from localStorage:', error);
     return initializeGlobalStats();
@@ -130,14 +171,16 @@ export function updateFrequency(
 }
 
 /**
- * Recalculate all-time frequency from scratch
+ * Recalculate all-time frequency from scratch (across all manches)
  */
 export function recalculateFrequency(games: LotoGame[]): Record<number, number> {
   const frequency: Record<number, number> = {};
 
   games.forEach((game) => {
-    game.numbers.forEach((num) => {
-      frequency[num] = (frequency[num] || 0) + 1;
+    game.manches.forEach((manche) => {
+      manche.numbers.forEach((num) => {
+        frequency[num] = (frequency[num] || 0) + 1;
+      });
     });
   });
 

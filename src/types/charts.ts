@@ -10,6 +10,7 @@ export interface NumberFrequency {
 
 export interface DecadeData {
   decade: string;
+  range?: string; // For compatibility
   count: number;
   percentage: number;
 }

@@ -3,28 +3,63 @@
  */
 
 /**
- * Represents a single Loto game session
+ * Represents a single manche (round) within a partie
  */
-export interface LotoGame {
+export interface Manche {
   /** Unique identifier (UUID) */
   id: string;
 
-  /** Game name (e.g., "Soirée du vendredi", "Partie #1") */
-  name: string;
-
-  /** Game date in ISO format */
-  date: string;
+  /** Manche number within the partie */
+  mancheNumber: number;
 
   /** Start time in ISO format */
   startTime: string;
 
-  /** End time in ISO format (optional, only when game is finished) */
+  /** End time in ISO format (optional, only when manche is finished) */
   endTime?: string;
 
   /** Numbers drawn in chronological order (1-90) */
   numbers: number[];
 
-  /** Whether the game is currently active */
+  /** Whether the manche is currently active */
+  isActive: boolean;
+
+  /** Position (1-based) when first quine was achieved */
+  quineAt?: number;
+
+  /** Position (1-based) when second quine was achieved */
+  deuxiemeQuineAt?: number;
+
+  /** Position (1-based) when double quine was achieved */
+  doubleQuineAt?: number;
+
+  /** Position (1-based) when carton plein was achieved */
+  cartonPleinAt?: number;
+}
+
+/**
+ * Represents a complete Loto partie (contains multiple manches)
+ */
+export interface LotoGame {
+  /** Unique identifier (UUID) */
+  id: string;
+
+  /** Partie name (e.g., "Soirée du vendredi", "Partie #1") */
+  name: string;
+
+  /** Partie date in ISO format */
+  date: string;
+
+  /** Start time in ISO format */
+  startTime: string;
+
+  /** End time in ISO format (optional, only when partie is finished) */
+  endTime?: string;
+
+  /** All manches in this partie */
+  manches: Manche[];
+
+  /** Whether the partie is currently active */
   isActive: boolean;
 }
 
@@ -86,6 +121,7 @@ export interface FrequencyData {
  * Statistics by decade (1-10, 11-20, etc.)
  */
 export interface DecadeStats {
+  decade: string; // e.g., "1-10" (for chart compatibility)
   range: string; // e.g., "1-10"
   count: number;
   percentage: number;
@@ -147,6 +183,25 @@ export interface ValidationResult {
 }
 
 /**
+ * Type guard to check if a value is a valid Manche
+ */
+export function isManche(value: unknown): value is Manche {
+  if (typeof value !== 'object' || value === null) return false;
+
+  const manche = value as Record<string, unknown>;
+
+  return (
+    typeof manche.id === 'string' &&
+    typeof manche.mancheNumber === 'number' &&
+    typeof manche.startTime === 'string' &&
+    Array.isArray(manche.numbers) &&
+    manche.numbers.every((n) => typeof n === 'number' && n >= 1 && n <= 90) &&
+    typeof manche.isActive === 'boolean' &&
+    (manche.endTime === undefined || typeof manche.endTime === 'string')
+  );
+}
+
+/**
  * Type guard to check if a value is a valid LotoGame
  */
 export function isLotoGame(value: unknown): value is LotoGame {
@@ -159,8 +214,8 @@ export function isLotoGame(value: unknown): value is LotoGame {
     typeof game.name === 'string' &&
     typeof game.date === 'string' &&
     typeof game.startTime === 'string' &&
-    Array.isArray(game.numbers) &&
-    game.numbers.every((n) => typeof n === 'number' && n >= 1 && n <= 90) &&
+    Array.isArray(game.manches) &&
+    game.manches.every(isManche) &&
     typeof game.isActive === 'boolean' &&
     (game.endTime === undefined || typeof game.endTime === 'string')
   );
