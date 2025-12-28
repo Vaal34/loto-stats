@@ -10,6 +10,8 @@ import { useTheme } from './hooks/useTheme';
 import { GlobalStats, isGlobalStats } from './types/game';
 import { initializeGlobalStats, saveGlobalStats } from './utils/storage';
 import { AUTO_SAVE_INTERVAL, STORAGE_KEY } from './constants/config';
+import { downloadJSON } from './utils/export';
+import { importFromFile } from './utils/import';
 
 // Lucide Icons
 import {
@@ -26,7 +28,9 @@ import {
   Check,
   Clock,
   Medal,
-  Trophy
+  Trophy,
+  Download,
+  Upload
 } from 'lucide-react';
 
 // shadcn/ui Components
@@ -129,6 +133,48 @@ function App() {
   };
 
   const darkMode = theme === 'dark';
+
+  // Handle file import
+  const handleImportFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const hasExistingData = globalStats.games.length > 0;
+
+    if (hasExistingData) {
+      const merge = window.confirm(
+        `Vous avez déjà ${globalStats.games.length} partie(s) enregistrée(s).\n\n` +
+        'Voulez-vous FUSIONNER les données (recommandé) ?\n\n' +
+        '✓ OUI = Fusionner (garder les parties existantes + ajouter les nouvelles)\n' +
+        '✗ NON = Remplacer (supprimer toutes les parties existantes)'
+      );
+
+      const result = await importFromFile(file, merge, globalStats);
+
+      if (result.success && result.stats) {
+        setGlobalStats(result.stats);
+        alert(`Import réussi ! ${result.stats.games.length} partie(s) au total.`);
+      } else {
+        alert(`Erreur d'import : ${result.error}`);
+      }
+    } else {
+      const result = await importFromFile(file, false, globalStats);
+
+      if (result.success && result.stats) {
+        setGlobalStats(result.stats);
+        alert(`Import réussi ! ${result.stats.games.length} partie(s) importée(s).`);
+      } else {
+        alert(`Erreur d'import : ${result.error}`);
+      }
+    }
+
+    event.target.value = '';
+  };
+
+  const handleExportData = () => {
+    downloadJSON(globalStats);
+    alert('Données exportées avec succès !');
+  };
 
   return (
     <div className={`min-h-screen ${darkMode ? 'dark' : ''}`}>
@@ -610,9 +656,59 @@ function App() {
 
                 <div>
                   <h3 className="font-semibold mb-2">Données</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground mb-4">
                     Parties enregistrées : {globalStats.totalGamesPlayed}
                   </p>
+
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Exporter les données</h4>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Téléchargez toutes vos parties au format JSON pour sauvegarde ou transfert.
+                      </p>
+                      <Button
+                        variant="outline"
+                        onClick={handleExportData}
+                        className="gap-2"
+                        disabled={globalStats.games.length === 0}
+                      >
+                        <Download className="h-4 w-4" />
+                        Exporter les données
+                      </Button>
+                    </div>
+
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Importer des données</h4>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Importez des parties depuis un fichier JSON.
+                        {globalStats.games.length > 0 && (
+                          <> Les données existantes peuvent être fusionnées ou remplacées.</>
+                        )}
+                      </p>
+                      <div>
+                        <input
+                          type="file"
+                          accept=".json,application/json"
+                          onChange={handleImportFile}
+                          className="hidden"
+                          id="import-file-input"
+                        />
+                        <label htmlFor="import-file-input">
+                          <Button variant="outline" className="gap-2" asChild>
+                            <span>
+                              <Upload className="h-4 w-4" />
+                              Importer des données
+                            </span>
+                          </Button>
+                        </label>
+                      </div>
+                      {globalStats.games.length > 0 && (
+                        <p className="text-xs text-amber-600 dark:text-amber-500 mt-2">
+                          ⚠️ Lors de l'import, vous pourrez choisir de fusionner ou remplacer vos données existantes.
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
