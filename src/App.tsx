@@ -47,8 +47,8 @@ import GapAnalysisCard from './components/stats/GapAnalysisCard';
 import FrequencyBarChart from './components/stats/charts/FrequencyBarChart';
 import Heatmap from './components/stats/charts/Heatmap';
 import TopFlopList from './components/stats/charts/TopFlopList';
-import DecadeDistribution from './components/stats/charts/DecadeDistribution';
-import ParityBalanceChart from './components/stats/charts/ParityBalanceChart';
+import ColumnDistributionChart from './components/stats/charts/ColumnDistributionChart';
+import QuineTimelineChart from './components/stats/charts/QuineTimelineChart';
 import MancheMilestones from './components/parties/MancheMilestones';
 
 function App() {
@@ -496,63 +496,81 @@ function App() {
 
             {/* Charts */}
             {selectedPartie && selectedPartie.manches.length > 0 ? (
-              <div className="space-y-6">
+              <div className="space-y-8">
 
-
-                <Card>
-                  <CardContent className="pt-6">
-                    <TimingStatsCard timingStats={stats.timingStats} darkMode={darkMode} />
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent className="pt-6">
-                    <GapAnalysisCard gapStats={stats.gapStats} darkMode={darkMode} />
-                  </CardContent>
-                </Card>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card>
-                    <CardContent className="pt-6">
-                      <FrequencyBarChart data={stats.frequencyData} darkMode={darkMode} />
-                    </CardContent>
-                  </Card>
+                {/* Section: Statistiques clés pour le jeu */}
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    Analyse des Gains
+                  </h2>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Card>
+                      <CardContent className="pt-6 h-full">
+                        <QuineTimelineChart partie={selectedPartie} darkMode={darkMode} />
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-6 h-full">
+                        <TimingStatsCard timingStats={stats.timingStats} darkMode={darkMode} />
+                      </CardContent>
+                    </Card>
+                  </div>
 
                   <Card>
-                    <CardContent className="pt-6">
-                      <ParityBalanceChart stats={stats.parityStats} darkMode={darkMode} />
+                    <CardContent className="pt-6 h-full">
+                      <QuineStatsCard quineStats={stats.quineStats} darkMode={darkMode} />
                     </CardContent>
                   </Card>
                 </div>
 
-                <Card>
-                  <CardContent className="pt-6">
-                    <Heatmap data={stats.frequencyData} darkMode={darkMode} />
-                  </CardContent>
-                </Card>
+                {/* Section: Analyse des numéros (crucial pour loto) */}
+                <div className="space-y-4 pt-4 border-t">
+                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    Analyse des Numéros
+                  </h2>
 
-                <Card>
-                  <CardContent className="pt-6">
-                    <TopFlopList
-                      topNumbers={stats.topNumbers}
-                      flopNumbers={stats.flopNumbers}
-                      darkMode={darkMode}
-                    />
-                  </CardContent>
-                </Card>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Card>
+                      <CardContent className="pt-6 h-full">
+                        <ColumnDistributionChart data={stats.frequencyData} darkMode={darkMode} />
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-6 h-full">
+                        <GapAnalysisCard gapStats={stats.gapStats} darkMode={darkMode} />
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
 
-                <Card>
-                  <CardContent className="pt-6">
-                    <DecadeDistribution data={stats.decadeStats} darkMode={darkMode} />
-                  </CardContent>
-                </Card>
+                {/* Section: Fréquences et tendances */}
+                <div className="space-y-4 pt-4 border-t">
+                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    Fréquences et Tendances
+                  </h2>
+                  <Card className="mb-6">
+                    <CardContent className="pt-6 h-full">
+                      <FrequencyBarChart data={stats.frequencyData} darkMode={darkMode} />
+                    </CardContent>
+                  </Card>
 
-                <Card>
-                  <CardContent className="pt-6">
-                    <QuineStatsCard quineStats={stats.quineStats} darkMode={darkMode} />
-                  </CardContent>
-                </Card>
-
+                  <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+                    <Card>
+                      <CardContent className="pt-6 h-full">
+                        <TopFlopList
+                          topNumbers={stats.topNumbers}
+                          flopNumbers={stats.flopNumbers}
+                          darkMode={darkMode}
+                        />
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-6 h-full">
+                        <Heatmap data={stats.frequencyData} darkMode={darkMode} />
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
 
               </div>
             ) : (

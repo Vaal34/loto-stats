@@ -2,10 +2,10 @@
  * Utility functions for analyzing Quine, Double Quine, and Carton Plein
  */
 
-import { Manche } from '../types/game';
+import { Manche } from "../types/game";
 
 export interface QuineMilestone {
-  type: 'quine' | 'deuxieme-quine' | 'double-quine' | 'carton-plein';
+  type: "quine" | "deuxieme-quine" | "double-quine" | "carton-plein";
   numberDrawn: number; // At which number in the sequence (1-90)
   position: number; // Position in the drawing sequence (index)
 }
@@ -35,16 +35,19 @@ export function analyzeMancheQuines(manche: Manche): MancheQuineAnalysis {
   if (manche.quineAt && manche.quineAt <= manche.numbers.length) {
     firstQuine = manche.quineAt;
     milestones.push({
-      type: 'quine',
+      type: "quine",
       numberDrawn: manche.numbers[manche.quineAt - 1] || 0,
       position: manche.quineAt,
     });
   }
 
-  if (manche.deuxiemeQuineAt && manche.deuxiemeQuineAt <= manche.numbers.length) {
+  if (
+    manche.deuxiemeQuineAt &&
+    manche.deuxiemeQuineAt <= manche.numbers.length
+  ) {
     deuxiemeQuine = manche.deuxiemeQuineAt;
     milestones.push({
-      type: 'deuxieme-quine',
+      type: "deuxieme-quine",
       numberDrawn: manche.numbers[manche.deuxiemeQuineAt - 1] || 0,
       position: manche.deuxiemeQuineAt,
     });
@@ -53,7 +56,7 @@ export function analyzeMancheQuines(manche: Manche): MancheQuineAnalysis {
   if (manche.doubleQuineAt && manche.doubleQuineAt <= manche.numbers.length) {
     doubleQuine = manche.doubleQuineAt;
     milestones.push({
-      type: 'double-quine',
+      type: "double-quine",
       numberDrawn: manche.numbers[manche.doubleQuineAt - 1] || 0,
       position: manche.doubleQuineAt,
     });
@@ -62,7 +65,7 @@ export function analyzeMancheQuines(manche: Manche): MancheQuineAnalysis {
   if (manche.cartonPleinAt && manche.cartonPleinAt <= manche.numbers.length) {
     cartonPlein = manche.cartonPleinAt;
     milestones.push({
-      type: 'carton-plein',
+      type: "carton-plein",
       numberDrawn: manche.numbers[manche.cartonPleinAt - 1] || 0,
       position: manche.cartonPleinAt,
     });
@@ -114,7 +117,8 @@ export function calculateQuineStats(manches: Manche[]) {
         : null,
     averageDeuxiemeQuinePosition:
       deuxiemeQuinePositions.length > 0
-        ? deuxiemeQuinePositions.reduce((a, b) => a + b, 0) / deuxiemeQuinePositions.length
+        ? deuxiemeQuinePositions.reduce((a, b) => a + b, 0) /
+          deuxiemeQuinePositions.length
         : null,
     averageDoubleQuinePosition:
       doubleQuinePositions.length > 0
@@ -130,43 +134,65 @@ export function calculateQuineStats(manches: Manche[]) {
     totalDeuxiemeQuines: deuxiemeQuinePositions.length,
     totalDoubleQuines: doubleQuinePositions.length,
     totalCartonPleins: cartonPleinPositions.length,
-    fastestQuine: quinePositions.length > 0 ? Math.min(...quinePositions) : null,
-    slowestQuine: quinePositions.length > 0 ? Math.max(...quinePositions) : null,
+    fastestQuine:
+      quinePositions.length > 0 ? Math.min(...quinePositions) : null,
+    slowestQuine:
+      quinePositions.length > 0 ? Math.max(...quinePositions) : null,
+    fastestDeuxiemeQuine:
+      deuxiemeQuinePositions.length > 0
+        ? Math.min(...deuxiemeQuinePositions)
+        : null,
+    slowestDeuxiemeQuine:
+      deuxiemeQuinePositions.length > 0
+        ? Math.max(...deuxiemeQuinePositions)
+        : null,
+    fastestDoubleQuine:
+      doubleQuinePositions.length > 0
+        ? Math.min(...doubleQuinePositions)
+        : null,
+    slowestDoubleQuine:
+      doubleQuinePositions.length > 0
+        ? Math.max(...doubleQuinePositions)
+        : null,
     fastestCartonPlein:
-      cartonPleinPositions.length > 0 ? Math.min(...cartonPleinPositions) : null,
+      cartonPleinPositions.length > 0
+        ? Math.min(...cartonPleinPositions)
+        : null,
     slowestCartonPlein:
-      cartonPleinPositions.length > 0 ? Math.max(...cartonPleinPositions) : null,
+      cartonPleinPositions.length > 0
+        ? Math.max(...cartonPleinPositions)
+        : null,
   };
 }
 
 /**
  * Get formatted label for milestone type
  */
-export function getMilestoneLabel(type: QuineMilestone['type']): string {
+export function getMilestoneLabel(type: QuineMilestone["type"]): string {
   switch (type) {
-    case 'quine':
-      return 'Quine';
-    case 'deuxieme-quine':
-      return '2ème Quine';
-    case 'double-quine':
-      return 'Double Quine';
-    case 'carton-plein':
-      return 'Carton Plein';
+    case "quine":
+      return "Quine";
+    case "deuxieme-quine":
+      return "2ème Quine";
+    case "double-quine":
+      return "Double Quine";
+    case "carton-plein":
+      return "Carton Plein";
   }
 }
 
 /**
  * Get color class for milestone badge
  */
-export function getMilestoneColor(type: QuineMilestone['type']): string {
+export function getMilestoneColor(type: QuineMilestone["type"]): string {
   switch (type) {
-    case 'quine':
-      return 'bg-blue-500 text-white';
-    case 'deuxieme-quine':
-      return 'bg-indigo-500 text-white';
-    case 'double-quine':
-      return 'bg-purple-500 text-white';
-    case 'carton-plein':
-      return 'bg-amber-500 text-white';
+    case "quine":
+      return "bg-blue-500 text-white";
+    case "deuxieme-quine":
+      return "bg-indigo-500 text-white";
+    case "double-quine":
+      return "bg-purple-500 text-white";
+    case "carton-plein":
+      return "bg-amber-500 text-white";
   }
 }

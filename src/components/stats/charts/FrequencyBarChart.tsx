@@ -3,6 +3,7 @@
  * Displays the frequency of each number (1-90) across all games
  */
 
+import { BarChart3 } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ReferenceLine } from 'recharts';
 import {
   ChartConfig,
@@ -31,7 +32,8 @@ export default function FrequencyBarChart({ data }: FrequencyBarChartProps) {
 
   return (
     <div className="w-full">
-      <h3 className="text-lg font-semibold mb-4">
+      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <BarChart3 className="h-5 w-5 text-primary" />
         Fréquence de tirage (1-90)
       </h3>
       <ChartContainer config={chartConfig} className="h-[300px] sm:h-[400px] w-full">
@@ -42,7 +44,7 @@ export default function FrequencyBarChart({ data }: FrequencyBarChartProps) {
             tickLine={false}
             axisLine={false}
             tickMargin={8}
-            interval="preserveStartEnd"
+            interval={9}
             tick={{ fontSize: 10 }}
             className="text-xs sm:text-sm"
           />

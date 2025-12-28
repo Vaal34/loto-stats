@@ -18,6 +18,10 @@ export interface QuineStats {
   totalCartonPleins: number;
   fastestQuine: number | null;
   slowestQuine: number | null;
+  fatestDeuxiemeQuine: number | null;
+  slowestDeuxiemeQuine: number | null;
+  fastestDoubleQuine: number | null;
+  slowestDoubleQuine: number | null;
   fastestCartonPlein: number | null;
   slowestCartonPlein: number | null;
 }
@@ -95,6 +99,10 @@ export function useStats(partie: LotoGame | null): UseStatsReturn {
         totalCartonPleins: 0,
         fastestQuine: null,
         slowestQuine: null,
+        fastestDeuxiemeQuine: null,
+        slowestDeuxiemeQuine: null,
+        fastestDoubleQuine: null,
+        slowestDoubleQuine: null,
         fastestCartonPlein: null,
         slowestCartonPlein: null,
       },

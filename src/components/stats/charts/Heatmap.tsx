@@ -3,6 +3,7 @@
  * 9x10 grid showing frequency as color intensity
  */
 
+import { Flame } from 'lucide-react';
 import { NumberFrequency } from '../../../types/charts';
 
 interface HeatmapProps {
@@ -37,8 +38,9 @@ export default function Heatmap({ data }: HeatmapProps) {
   }
 
   return (
-    <div className="w-full">
-      <h3 className="text-lg font-semibold mb-4">
+    <div className="w-full justify-center items-center flex flex-col">
+      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <Flame className="h-5 w-5 text-primary" />
         Carte de chaleur (Heatmap)
       </h3>
 
