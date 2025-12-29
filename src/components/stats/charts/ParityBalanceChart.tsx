@@ -40,7 +40,7 @@ export default function ParityBalanceChart({ stats }: ParityBalanceChartProps) {
 
     return (
         <div className="w-full flexflex-col items-center">
-            <h3 className="text-lg font-semibold mb-4 text-center">
+            <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-4 text-center">
                 Équilibre Pair / Impair
             </h3>
             <div className="flex justify-center">

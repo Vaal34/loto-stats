@@ -32,59 +32,59 @@ const TimingStatsCard: React.FC<TimingStatsCardProps> = ({ timingStats }) => {
   }
 
   return (
-    <div className="w-full h-full flex flex-col">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Clock className="h-5 w-5 text-primary" />
-          Rythme de jeu
+    <div className="w-full h-full flex flex-col gap-4">
+      <div className="flex flex-col gap-1">
+        <h3 className="text-sm sm:text-base md:text-lg font-semibold flex items-center gap-2">
+          <Clock className="h-5 w-5 shrink-0 text-primary" />
+          <span>Rythme de jeu</span>
         </h3>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-sm text-muted-foreground">
           Analyse de la vitesse des tirages
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 auto-rows-fr gap-4 flex-1">
         {/* Durée moyenne d'une manche */}
-        <div className="rounded-lg border bg-card p-4 flex flex-col">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="rounded-lg border bg-card p-4 flex flex-col gap-2">
+          <div className="flex items-center gap-2">
             <Timer className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium text-muted-foreground">
               Durée Moyenne
             </span>
           </div>
-          <div className="flex-1 flex flex-col justify-center">
+          <div className="flex-1 flex flex-col justify-center gap-1">
             <div className="text-2xl font-bold">
               {formatDuration(timingStats.averageMancheDurationSeconds)}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">par manche</p>
+            <p className="text-xs text-muted-foreground">par manche</p>
           </div>
-          <p className="text-xs text-muted-foreground mt-2 border-t pt-2">
+          <p className="text-xs text-muted-foreground border-t pt-2">
             Temps moyen du premier au dernier numéro tiré
           </p>
         </div>
 
         {/* Temps entre tirages */}
-        <div className="rounded-lg border bg-card p-4 flex flex-col">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="rounded-lg border bg-card p-4 flex flex-col gap-2">
+          <div className="flex items-center gap-2">
             <Hourglass className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium text-muted-foreground">
               Cadence
             </span>
           </div>
-          <div className="flex-1 flex flex-col justify-center">
+          <div className="flex-1 flex flex-col justify-center gap-1">
             <div className="text-2xl font-bold">
               {formatSpeed(timingStats.averageTimeBetweenDrawsSeconds)}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">entre deux numéros</p>
+            <p className="text-xs text-muted-foreground">entre deux numéros</p>
           </div>
-          <p className="text-xs text-muted-foreground mt-2 border-t pt-2">
+          <p className="text-xs text-muted-foreground border-t pt-2">
             Intervalle moyen entre chaque tirage consécutif
           </p>
         </div>
 
         {/* Manche la plus rapide */}
-        <div className="rounded-lg border bg-card p-4 flex flex-col">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="rounded-lg border bg-card p-4 flex flex-col gap-2">
+          <div className="flex items-center gap-2">
             <Zap className="h-4 w-4 text-yellow-500" />
             <span className="text-sm font-medium text-muted-foreground">
               La plus rapide
@@ -95,14 +95,14 @@ const TimingStatsCard: React.FC<TimingStatsCardProps> = ({ timingStats }) => {
               {formatDuration(timingStats.fastestMancheSeconds)}
             </div>
           </div>
-          <p className="text-xs text-muted-foreground mt-2 border-t pt-2">
+          <p className="text-xs text-muted-foreground border-t pt-2">
             Record de vitesse pour terminer une manche
           </p>
         </div>
 
         {/* Manche la plus lente */}
-        <div className="rounded-lg border bg-card p-4 flex flex-col">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="rounded-lg border bg-card p-4 flex flex-col gap-2">
+          <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-orange-500" />
             <span className="text-sm font-medium text-muted-foreground">
               La plus longue
@@ -113,7 +113,7 @@ const TimingStatsCard: React.FC<TimingStatsCardProps> = ({ timingStats }) => {
               {formatDuration(timingStats.slowestMancheSeconds)}
             </div>
           </div>
-          <p className="text-xs text-muted-foreground mt-2 border-t pt-2">
+          <p className="text-xs text-muted-foreground border-t pt-2">
             Manche ayant pris le plus de temps
           </p>
         </div>

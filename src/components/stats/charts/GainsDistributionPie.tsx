@@ -79,8 +79,8 @@ export default function GainsDistributionPie({ quineStats }: GainsDistributionPi
   if (total === 0) {
     return (
       <div className="w-full">
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <PieChartIcon className="h-5 w-5 text-primary" />
+        <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-4 flex items-center gap-2">
+          <PieChartIcon className="h-5 w-5 shrink-0 text-primary" />
           Répartition des Gains
         </h3>
         <div className="text-center text-muted-foreground py-8">
@@ -93,8 +93,8 @@ export default function GainsDistributionPie({ quineStats }: GainsDistributionPi
   return (
     <div className="w-full">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <PieChartIcon className="h-5 w-5 text-primary" />
+        <h3 className="text-sm sm:text-base md:text-lg font-semibold flex items-center gap-2">
+          <PieChartIcon className="h-5 w-5 shrink-0 text-primary" />
           Répartition des Gains
         </h3>
         <p className="text-sm text-muted-foreground mt-1">

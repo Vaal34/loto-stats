@@ -33,7 +33,7 @@ export default function DecadeDistribution({ data }: DecadeDistributionProps) {
 
   return (
     <div className="w-full">
-      <h3 className="text-lg font-semibold mb-4">
+      <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-4">
         Distribution par dizaine
       </h3>
       <ChartContainer config={chartConfig} className="h-[280px] sm:h-[350px] w-full">

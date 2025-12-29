@@ -32,8 +32,8 @@ export default function FrequencyBarChart({ data }: FrequencyBarChartProps) {
 
   return (
     <div className="w-full">
-      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-        <BarChart3 className="h-5 w-5 text-primary" />
+      <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-4 flex items-center gap-2">
+        <BarChart3 className="h-5 w-5 shrink-0 text-primary" />
         Fréquence de tirage (1-90)
       </h3>
       <ChartContainer config={chartConfig} className="h-[300px] sm:h-[400px] w-full">

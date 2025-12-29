@@ -102,13 +102,11 @@ const QuineStatsCard: React.FC<QuineStatsCardProps> = ({ quineStats }) => {
 
   if (hasNoData) {
     return (
-      <div className="w-full">
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-primary" />
-            Statistiques Quine / Double Quine / Carton Plein
-          </h3>
-        </div>
+      <div className="w-full flex flex-col gap-4">
+        <h3 className="text-sm sm:text-base md:text-lg font-semibold flex items-center gap-2">
+          <Trophy className="h-5 w-5 shrink-0 text-primary" />
+          <span className="line-clamp-2">Statistiques Quine / Double Quine / Carton Plein</span>
+        </h3>
         <div className="rounded-lg border bg-card p-6 text-center">
           <p className="text-sm text-muted-foreground">
             Aucune donnée disponible. Les statistiques apparaîtront après avoir joué au moins une manche complète.
@@ -119,13 +117,13 @@ const QuineStatsCard: React.FC<QuineStatsCardProps> = ({ quineStats }) => {
   }
 
   return (
-    <div className="w-full">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Trophy className="h-5 w-5 text-primary" />
-          Statistiques Quine / Double Quine / Carton Plein
+    <div className="w-full flex flex-col gap-4">
+      <div className="flex flex-col gap-1">
+        <h3 className="text-sm sm:text-base md:text-lg font-semibold flex items-center gap-2">
+          <Trophy className="h-5 w-5 shrink-0 text-primary" />
+          <span className="line-clamp-2">Statistiques Quine / Double Quine / Carton Plein</span>
         </h3>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-sm text-muted-foreground">
           À quel numéro en moyenne chaque étape est atteinte ?
         </p>
       </div>
@@ -136,10 +134,10 @@ const QuineStatsCard: React.FC<QuineStatsCardProps> = ({ quineStats }) => {
           return (
             <div
               key={card.title}
-              className="rounded-lg border bg-card p-4"
+              className="rounded-lg border bg-card p-4 flex flex-col gap-3"
             >
-              <div className="flex items-center gap-2 mb-3">
-                <Icon className={`h-5 w-5 ${card.iconColor}`} />
+              <div className="flex items-center gap-2">
+                <Icon className={`h-5 w-5 shrink-0 ${card.iconColor}`} />
                 <div>
                   <h4 className="font-semibold">
                     {card.title}
@@ -176,7 +174,7 @@ const QuineStatsCard: React.FC<QuineStatsCardProps> = ({ quineStats }) => {
       </div>
 
       {/* Summary insights */}
-      <div className="mt-4 rounded-lg border bg-card p-4">
+      <div className="rounded-lg border bg-card p-4">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
           <div className="flex items-center gap-2">
             <Target className="h-4 w-4 text-blue-500" />

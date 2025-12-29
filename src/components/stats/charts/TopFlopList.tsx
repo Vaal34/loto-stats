@@ -24,7 +24,7 @@ export default function TopFlopList({ topNumbers, flopNumbers }: TopFlopListProp
 
   return (
     <div className="w-full">
-      <h3 className="text-lg font-semibold mb-4">
+      <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-4">
         Top & Flop des numéros
       </h3>
 

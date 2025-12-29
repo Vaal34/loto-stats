@@ -38,22 +38,22 @@ export default function Heatmap({ data }: HeatmapProps) {
   }
 
   return (
-    <div className="w-full justify-center items-center flex flex-col">
-      <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-        <Flame className="h-5 w-5 text-primary" />
+    <div className="w-full flex flex-col">
+      <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-4 flex items-center gap-2">
+        <Flame className="h-5 w-5 shrink-0 text-primary" />
         Carte de chaleur (Heatmap)
       </h3>
 
-      <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-        <div className="inline-block min-w-full">
+      <div className="w-full overflow-x-auto">
+        <div className="inline-block min-w-max">
           {grid.map((row, rowIndex) => (
             <div key={rowIndex} className="flex">
               {row.map((cell) => (
                 <div
                   key={cell.number}
-                  className={`relative group w-[45px] h-[45px] sm:w-[60px] sm:h-[60px] flex items-center justify-center border transition-all hover:scale-105 cursor-pointer ${getColorClass(cell.count)}`}
+                  className={`relative group w-[32px] h-[32px] xs:w-[36px] xs:h-[36px] sm:w-[45px] sm:h-[45px] md:w-[60px] md:h-[60px] flex items-center justify-center border transition-all hover:scale-105 cursor-pointer ${getColorClass(cell.count)}`}
                 >
-                  <span className="text-xs sm:text-sm font-semibold">
+                  <span className="text-[10px] xs:text-xs sm:text-sm font-semibold">
                     {cell.number}
                   </span>
 

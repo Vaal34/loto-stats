@@ -45,9 +45,9 @@ export default function NumbersEnRetardChart({ gapStats }: NumbersEnRetardChartP
   return (
     <div className="w-full">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Clock3 className="h-5 w-5 text-primary" />
-          Top 15 Numéros en Retard
+        <h3 className="text-sm sm:text-base md:text-lg font-semibold flex items-center gap-2">
+          <Clock3 className="h-5 w-5 shrink-0 text-primary" />
+          <span className="line-clamp-2">Top 15 Numéros en Retard</span>
         </h3>
         <p className="text-sm text-muted-foreground mt-1">
           Numéros non sortis depuis le plus de tirages

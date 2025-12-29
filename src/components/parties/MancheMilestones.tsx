@@ -10,13 +10,11 @@ import { analyzeMancheQuines, QuineMilestone } from '../../utils/quineAnalysis';
 
 interface MancheMilestonesProps {
     manche: Manche;
-    darkMode?: boolean;
     compact?: boolean;
 }
 
 const MancheMilestones: React.FC<MancheMilestonesProps> = ({
     manche,
-    darkMode = false,
     compact = false
 }) => {
     const analysis = useMemo(() => analyzeMancheQuines(manche), [manche]);
@@ -27,33 +25,33 @@ const MancheMilestones: React.FC<MancheMilestonesProps> = ({
                 return {
                     icon: <Target className="h-3 w-3" />,
                     label: 'Quine',
-                    bgColor: darkMode ? 'bg-blue-900/50' : 'bg-blue-100',
-                    textColor: darkMode ? 'text-blue-300' : 'text-blue-700',
-                    borderColor: darkMode ? 'border-blue-700' : 'border-blue-300',
+                    bgColor: 'bg-chart-1/10',
+                    textColor: 'text-chart-1',
+                    borderColor: 'border-chart-1/30',
                 };
             case 'deuxieme-quine':
                 return {
                     icon: <Target className="h-3 w-3" />,
                     label: '2ème Quine',
-                    bgColor: darkMode ? 'bg-indigo-900/50' : 'bg-indigo-100',
-                    textColor: darkMode ? 'text-indigo-300' : 'text-indigo-700',
-                    borderColor: darkMode ? 'border-indigo-700' : 'border-indigo-300',
+                    bgColor: 'bg-chart-2/10',
+                    textColor: 'text-chart-2',
+                    borderColor: 'border-chart-2/30',
                 };
             case 'double-quine':
                 return {
                     icon: <Medal className="h-3 w-3" />,
                     label: 'Double Quine',
-                    bgColor: darkMode ? 'bg-purple-900/50' : 'bg-purple-100',
-                    textColor: darkMode ? 'text-purple-300' : 'text-purple-700',
-                    borderColor: darkMode ? 'border-purple-700' : 'border-purple-300',
+                    bgColor: 'bg-chart-4/10',
+                    textColor: 'text-chart-4',
+                    borderColor: 'border-chart-4/30',
                 };
             case 'carton-plein':
                 return {
                     icon: <Trophy className="h-3 w-3" />,
                     label: 'Carton Plein',
-                    bgColor: darkMode ? 'bg-amber-900/50' : 'bg-amber-100',
-                    textColor: darkMode ? 'text-amber-300' : 'text-amber-700',
-                    borderColor: darkMode ? 'border-amber-700' : 'border-amber-300',
+                    bgColor: 'bg-chart-5/10',
+                    textColor: 'text-chart-5',
+                    borderColor: 'border-chart-5/30',
                 };
         }
     };
@@ -64,17 +62,18 @@ const MancheMilestones: React.FC<MancheMilestonesProps> = ({
 
     if (compact) {
         return (
-            <div className="flex flex-wrap gap-1">
+            <div className="flex gap-1">
                 {analysis.milestones.map((milestone, index) => {
                     const config = getMilestoneConfig(milestone.type);
+                    const formattedPosition = milestone.position < 10 ? `0${milestone.position}` : milestone.position.toString();
                     return (
                         <span
                             key={index}
-                            className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium border ${config.bgColor} ${config.textColor} ${config.borderColor}`}
+                            className={`inline-flex items-center justify-center gap-0.5 px-1 py-0.5 rounded text-xs font-medium border flex-1 ${config.bgColor} ${config.textColor} ${config.borderColor}`}
                             title={`${config.label} au ${milestone.position}ème numéro (${milestone.numberDrawn})`}
                         >
                             {config.icon}
-                            <span>{milestone.position}</span>
+                            <span className="tabular-nums">{formattedPosition}</span>
                         </span>
                     );
                 })}
@@ -83,20 +82,20 @@ const MancheMilestones: React.FC<MancheMilestonesProps> = ({
     }
 
     return (
-        <div className="space-y-1.5 mt-2">
+        <div className="flex flex-col gap-1.5">
             {analysis.milestones.map((milestone, index) => {
                 const config = getMilestoneConfig(milestone.type);
                 return (
                     <div
                         key={index}
-                        className={`inline-flex items-center gap-2 px-2 py-1 rounded-md text-xs font-medium border mr-2 ${config.bgColor} ${config.textColor} ${config.borderColor}`}
+                        className={`inline-flex items-center gap-2 px-2 py-1 rounded-md text-xs font-medium border ${config.bgColor} ${config.textColor} ${config.borderColor}`}
                     >
                         {config.icon}
                         <span>{config.label}</span>
-                        <span className={`font-normal ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                        <span className="font-normal text-muted-foreground">
                             au {milestone.position}ème numéro
                         </span>
-                        <span className={`font-bold px-1.5 py-0.5 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                        <span className="font-bold px-1.5 py-0.5 rounded bg-background">
                             {milestone.numberDrawn}
                         </span>
                     </div>

@@ -91,9 +91,9 @@ export default function ColumnDistributionChart({ data }: ColumnDistributionChar
   return (
     <div className="w-full">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Columns3 className="h-5 w-5 text-primary" />
-          Distribution par Colonne du Carton
+        <h3 className="text-sm sm:text-base md:text-lg font-semibold flex items-center gap-2">
+          <Columns3 className="h-5 w-5 shrink-0 text-primary" />
+          <span className="line-clamp-2">Distribution par Colonne du Carton</span>
         </h3>
         <p className="text-sm text-muted-foreground mt-1">
           Répartition des numéros selon les colonnes du carton de loto
