@@ -54,15 +54,15 @@ L'application stocke toutes vos données localement dans votre navigateur et per
 #### Analyse des numéros
 - **Distribution par colonnes** : Fréquence des numéros par dizaines
 - **Analyse des écarts** : Numéros les plus et moins fréquents
-- **Heatmap** : Visualisation thermique de la fréquence de tous les numéros
-- **Top/Flop** : Classement des numéros les plus et moins tirés
+- **Numéros en retard** : Identification des numéros peu tirés
 
 ![Analyse des numéros](docs/images/stats-numbers.png)
 <!-- Capture d'écran : Section "Analyse des Numéros" avec les graphiques de distribution -->
 
 #### Fréquences et tendances
 - **Graphique de fréquence** : Histogramme des apparitions par numéro
-- **Numéros en retard** : Identification des numéros peu tirés
+- **Top/Flop** : Classement des numéros les plus et moins tirés
+- **Heatmap** : Visualisation thermique de la fréquence de tous les numéros
 
 ![Fréquences](docs/images/stats-frequency.png)
 <!-- Capture d'écran : Section "Fréquences et Tendances" avec le bar chart -->

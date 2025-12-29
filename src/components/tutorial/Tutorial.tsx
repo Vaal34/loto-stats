@@ -193,21 +193,32 @@ export default function Tutorial({ onClose, onTabChange }: TutorialProps) {
               variant="outline"
               onClick={handlePrevious}
               disabled={isFirst}
-              className="gap-2"
+              size="icon"
+              className="sm:w-auto sm:px-4"
+              title="Précédent"
             >
               <ChevronLeft className="h-4 w-4" />
-              Précédent
+              <span className="hidden sm:inline ml-2">Précédent</span>
             </Button>
 
             <div className="flex gap-2">
               {!isLast && (
-                <Button variant="ghost" onClick={handleSkip}>
+                <Button
+                  variant="ghost"
+                  onClick={handleSkip}
+                  className="hidden sm:inline-flex"
+                >
                   Passer le tutoriel
                 </Button>
               )}
-              <Button onClick={handleNext} className="gap-2">
-                {isLast ? 'Terminer' : 'Suivant'}
-                {!isLast && <ChevronRight className="h-4 w-4" />}
+              <Button
+                onClick={handleNext}
+                size="icon"
+                className="sm:w-auto sm:px-4"
+                title={isLast ? 'Terminer' : 'Suivant'}
+              >
+                <span className="hidden sm:inline mr-2">{isLast ? 'Terminer' : 'Suivant'}</span>
+                {isLast ? <Target className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
               </Button>
             </div>
           </div>
