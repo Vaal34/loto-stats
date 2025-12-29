@@ -45,7 +45,7 @@ const Header: React.FC<HeaderProps> = ({ activeGame, darkMode, onToggleTheme }) 
       <div className="container mx-auto px-4 py-3 sm:py-4">
         <div className="flex items-center justify-between gap-4">
           {/* Left: App Title and Active Game Status */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 flex flex-col gap-1">
             <h1
               className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight truncate"
               style={{ color: darkMode ? '#f9fafb' : '#111827' }}
@@ -55,7 +55,7 @@ const Header: React.FC<HeaderProps> = ({ activeGame, darkMode, onToggleTheme }) 
 
             {/* Active Game Status */}
             {activeGame && (
-              <div className="flex items-center gap-2 mt-1 flex-wrap sm:flex-nowrap">
+              <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                 {/* Game Name */}
                 <span
                   className="text-xs sm:text-sm font-medium truncate max-w-[150px] sm:max-w-none"

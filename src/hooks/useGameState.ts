@@ -12,6 +12,7 @@ interface UseGameStateReturn {
   activeManche: Manche | null;
   startNewGame: (name?: string) => void;
   endGame: () => void;
+  deleteGame: (gameId: string) => void;
   resumeGame: (gameId: string) => void;
   startNewManche: () => void;
   endManche: () => void;
@@ -42,11 +43,35 @@ export function useGameState(
 
   // Sync activeGame and activeManche when globalStats changes
   useEffect(() => {
+    // Check if there are multiple active games (data corruption)
+    const activeGames = globalStats.games.filter((g) => g.isActive);
+
+    if (activeGames.length > 1) {
+      console.warn('Multiple active games detected! Fixing...');
+      // Keep only the most recent active game
+      const mostRecent = activeGames.reduce((latest, game) =>
+        new Date(game.startTime) > new Date(latest.startTime) ? game : latest
+      );
+
+      setGlobalStats((prev) => ({
+        ...prev,
+        games: prev.games.map((g) =>
+          g.isActive && g.id !== mostRecent.id
+            ? { ...g, isActive: false, endTime: g.endTime || new Date().toISOString() }
+            : g
+        ),
+      }));
+
+      setActiveGame(mostRecent);
+    } else {
+      const active = activeGames[0] || null;
+      setActiveGame(active);
+    }
+
     const active = globalStats.games.find((g) => g.isActive) || null;
-    setActiveGame(active);
     const manche = active?.manches.find((m) => m.isActive) || null;
     setActiveManche(manche);
-  }, [globalStats]);
+  }, [globalStats, setGlobalStats]);
 
   /**
    * Start a new partie
@@ -63,25 +88,6 @@ export function useGameState(
         if (!confirm) {
           return;
         }
-
-        // End existing partie and all its manches
-        setGlobalStats((prev) => ({
-          ...prev,
-          games: prev.games.map((g) =>
-            g.id === existingActive.id
-              ? {
-                  ...g,
-                  isActive: false,
-                  endTime: new Date().toISOString(),
-                  manches: g.manches.map((m) => ({
-                    ...m,
-                    isActive: false,
-                    endTime: m.endTime || new Date().toISOString(),
-                  })),
-                }
-              : g
-          ),
-        }));
       }
 
       const now = new Date().toISOString();
@@ -96,9 +102,26 @@ export function useGameState(
         isActive: true,
       };
 
+      // End existing partie and create new game in one operation
       setGlobalStats((prev) => ({
         ...prev,
-        games: [...prev.games, newGame],
+        games: [
+          ...prev.games.map((g) =>
+            g.isActive
+              ? {
+                  ...g,
+                  isActive: false,
+                  endTime: now,
+                  manches: g.manches.map((m) => ({
+                    ...m,
+                    isActive: false,
+                    endTime: m.endTime || now,
+                  })),
+                }
+              : g
+          ),
+          newGame,
+        ],
         totalGamesPlayed: prev.totalGamesPlayed + 1,
       }));
 
@@ -141,6 +164,40 @@ export function useGameState(
   }, [activeGame, setGlobalStats]);
 
   /**
+   * Delete a partie
+   */
+  const deleteGame = useCallback(
+    (gameId: string) => {
+      const gameToDelete = globalStats.games.find((g) => g.id === gameId);
+
+      if (!gameToDelete) {
+        alert('Partie introuvable.');
+        return;
+      }
+
+      const confirm = window.confirm(
+        `Voulez-vous vraiment supprimer la partie "${gameToDelete.name}" ? Cette action est irréversible.`
+      );
+
+      if (!confirm) {
+        return;
+      }
+
+      setGlobalStats((prev) => ({
+        ...prev,
+        games: prev.games.filter((g) => g.id !== gameId),
+      }));
+
+      // If we deleted the active game, clear the state
+      if (activeGame?.id === gameId) {
+        setActiveGame(null);
+        setActiveManche(null);
+      }
+    },
+    [globalStats.games, activeGame, setGlobalStats]
+  );
+
+  /**
    * Resume (reactivate) an existing partie
    */
   const resumeGame = useCallback(
@@ -155,7 +212,7 @@ export function useGameState(
       // Check if there's already an active game
       const existingActive = globalStats.games.find((g) => g.isActive);
 
-      if (existingActive) {
+      if (existingActive && existingActive.id !== gameId) {
         const confirm = window.confirm(
           `Une partie "${existingActive.name}" est déjà en cours. Voulez-vous la terminer et reprendre "${gameToResume.name}" ?`
         );
@@ -163,39 +220,34 @@ export function useGameState(
         if (!confirm) {
           return;
         }
-
-        // End existing partie
-        setGlobalStats((prev) => ({
-          ...prev,
-          games: prev.games.map((g) =>
-            g.id === existingActive.id
-              ? {
-                  ...g,
-                  isActive: false,
-                  endTime: new Date().toISOString(),
-                  manches: g.manches.map((m) => ({
-                    ...m,
-                    isActive: false,
-                    endTime: m.endTime || new Date().toISOString(),
-                  })),
-                }
-              : g
-          ),
-        }));
       }
 
-      // Reactivate the selected game
+      // End existing partie and reactivate the selected game in one operation
       setGlobalStats((prev) => ({
         ...prev,
-        games: prev.games.map((g) =>
-          g.id === gameId
-            ? {
-                ...g,
-                isActive: true,
-                endTime: undefined, // Clear end time since we're resuming
-              }
-            : g
-        ),
+        games: prev.games.map((g) => {
+          if (g.id === gameId) {
+            // Reactivate this game
+            return {
+              ...g,
+              isActive: true,
+              endTime: undefined, // Clear end time since we're resuming
+            };
+          } else if (g.isActive) {
+            // Deactivate any other active game
+            return {
+              ...g,
+              isActive: false,
+              endTime: new Date().toISOString(),
+              manches: g.manches.map((m) => ({
+                ...m,
+                isActive: false,
+                endTime: m.endTime || new Date().toISOString(),
+              })),
+            };
+          }
+          return g;
+        }),
       }));
 
       setActiveGame(gameToResume);
@@ -584,6 +636,7 @@ export function useGameState(
     activeManche,
     startNewGame,
     endGame,
+    deleteGame,
     resumeGame,
     startNewManche,
     endManche,

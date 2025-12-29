@@ -31,13 +31,14 @@ import {
   Medal,
   Trophy,
   Download,
-  Upload
+  Upload,
+  Trash2
 } from 'lucide-react';
 
 // shadcn/ui Components
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MotionTabs as Tabs, MotionTabsContent as TabsContent, MotionTabsList as TabsList, MotionTabsTrigger as TabsTrigger, MotionTabsContents } from '@/components/ui/motion-tabs';
 import { Badge } from '@/components/ui/badge';
 import {
   AlertDialog,
@@ -78,6 +79,7 @@ function App() {
     activeManche,
     startNewGame,
     endGame,
+    deleteGame,
     resumeGame,
     startNewManche,
     endManche,
@@ -245,47 +247,112 @@ function App() {
     alert('Données exportées avec succès !');
   };
 
+  const handleLoadDemo = async () => {
+    const hasExistingData = globalStats.games.length > 0;
+
+    if (hasExistingData) {
+      const confirm = window.confirm(
+        `Vous avez déjà ${globalStats.games.length} partie(s) enregistrée(s).\n\n` +
+        'Charger la démo supprimera toutes vos données actuelles.\n\n' +
+        'Voulez-vous continuer ?'
+      );
+
+      if (!confirm) {
+        return;
+      }
+    }
+
+    try {
+      const demoData = await import('./data/demoData.json');
+      setGlobalStats(demoData.default as GlobalStats);
+      alert('Partie démo chargée avec succès !');
+    } catch (error) {
+      console.error('Erreur lors du chargement de la démo:', error);
+      alert('Erreur lors du chargement de la partie démo.');
+    }
+  };
+
   return (
     <div className={`min-h-screen ${darkMode ? 'dark' : ''}`}>
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between px-4">
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Dice5 className="h-6 w-6" />
-              Loto Stats
-            </h1>
-            {activeGame && (
-              <p className="text-sm text-muted-foreground">
-                {activeGame.name}
-                {activeManche && ` • Manche #${activeManche.mancheNumber}`}
-                {activeManche && ` • ${activeManche.numbers.length}/90 numéros`}
-              </p>
-            )}
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="text-xs text-muted-foreground flex items-center gap-1">
-              {isSaved ? (
-                <>
-                  <Check className="h-3 w-3" />
-                  <span>Sauvegardé {lastSaved.toLocaleTimeString()}</span>
-                </>
-              ) : (
-                <>
-                  <Clock className="h-3 w-3 animate-spin" />
-                  <span>Sauvegarde...</span>
-                </>
+        <div className="container px-4 py-3">
+          {/* Desktop: single row */}
+          <div className="hidden sm:flex h-10 items-center justify-between">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-bold flex items-center gap-2">
+                <Dice5 className="h-6 w-6" />
+                Loto Stats
+              </h1>
+              {activeGame && (
+                <p className="text-sm text-muted-foreground truncate">
+                  {activeGame.name}
+                  {activeManche && ` • Manche #${activeManche.mancheNumber}`}
+                  {activeManche && ` • ${activeManche.numbers.length}/90 numéros`}
+                </p>
               )}
             </div>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={toggleTheme}
-              aria-label="Toggle theme"
-            >
-              {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </Button>
+
+            <div className="flex items-center gap-4 ml-4">
+              <div className="text-xs text-muted-foreground flex items-center gap-1">
+                {isSaved ? (
+                  <>
+                    <Check className="h-3 w-3" />
+                    <span>Sauvegardé {lastSaved.toLocaleTimeString()}</span>
+                  </>
+                ) : (
+                  <>
+                    <Clock className="h-3 w-3 animate-spin" />
+                    <span>Sauvegarde...</span>
+                  </>
+                )}
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={toggleTheme}
+                aria-label="Toggle theme"
+              >
+                {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </Button>
+            </div>
+          </div>
+
+          {/* Mobile: two rows */}
+          <div className="sm:hidden space-y-2">
+            {/* Row 1: Title + Theme button */}
+            <div className="flex items-center justify-between">
+              <h1 className="text-xl font-bold flex items-center gap-2">
+                <Dice5 className="h-5 w-5" />
+                Loto Stats
+              </h1>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={toggleTheme}
+                aria-label="Toggle theme"
+                className="h-8 w-8"
+              >
+                {darkMode ? <Sun className="h-3 w-3" /> : <Moon className="h-3 w-3" />}
+              </Button>
+            </div>
+
+            {/* Row 2: Game info + Save status */}
+            {activeGame && (
+              <div className="flex items-center justify-between text-xs">
+                <p className="text-muted-foreground truncate flex-1 min-w-0 pr-2">
+                  {activeGame.name}
+                  {activeManche && ` • M${activeManche.mancheNumber} • ${activeManche.numbers.length}/90`}
+                </p>
+                <div className="text-muted-foreground flex items-center gap-1 shrink-0">
+                  {isSaved ? (
+                    <Check className="h-3 w-3" />
+                  ) : (
+                    <Clock className="h-3 w-3 animate-spin" />
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -315,23 +382,24 @@ function App() {
             </TabsTrigger>
           </TabsList>
 
+          <MotionTabsContents>
           {/* Partie Tab */}
           <TabsContent value="partie" className="space-y-6">
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center justify-between">
+                  <div className="flex flex-col gap-1">
                     <CardTitle>
                       {activeGame ? activeGame.name : 'Aucune partie active'}
                     </CardTitle>
                     {activeGame && (
-                      <CardDescription className="mt-1">
+                      <CardDescription>
                         {activeGame.manches.length} manche(s)
                         {activeManche && ` • Manche #${activeManche.mancheNumber} en cours`}
                       </CardDescription>
                     )}
                   </div>
-                  <div className="flex gap-2 flex-wrap">
+                  <div className="flex gap-2 flex-col sm:flex-row">
                     {!activeGame && (
                       <Button onClick={() => startNewGame()} className="gap-2 text-xs sm:text-sm">
                         <Plus className="h-4 w-4" />
@@ -394,16 +462,16 @@ function App() {
                   </div>
 
                   {/* Milestone Buttons */}
-                  <div className="border-t pt-4">
-                    <div className="text-sm font-medium mb-3">Marquer un gain :</div>
-                    <div className="flex flex-wrap gap-2">
+                  <div className="border-t pt-4 flex flex-col gap-3">
+                    <div className="text-sm font-medium">Marquer un gain :</div>
+                    <div className="flex flex-col sm:flex-row flex-wrap gap-2">
                       {/* Quine Button */}
                       {activeManche.quineAt ? (
                         <div className="flex items-center gap-1">
                           <Button
                             variant="outline"
                             size="sm"
-                            className="gap-2 bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300"
+                            className="gap-2 bg-chart-1/10 border-chart-1/30 text-chart-1 hover:bg-chart-1/20"
                             onClick={() => editMilestonePosition('quine', activeManche.quineAt!, 'de la Quine')}
                           >
                             <span>✓ Quine au {activeManche.quineAt}ème</span>
@@ -411,7 +479,7 @@ function App() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0"
+                            className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
                             onClick={() => clearMilestone('quine')}
                             title="Supprimer"
                           >
@@ -436,7 +504,7 @@ function App() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="gap-2 bg-indigo-100 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300"
+                            className="gap-2 bg-chart-2/10 border-chart-2/30 text-chart-2 hover:bg-chart-2/20"
                             onClick={() => editMilestonePosition('deuxieme-quine', activeManche.deuxiemeQuineAt!, 'de la 2ème Quine')}
                           >
                             <span>✓ 2ème Quine au {activeManche.deuxiemeQuineAt}ème</span>
@@ -444,7 +512,7 @@ function App() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0"
+                            className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
                             onClick={() => clearMilestone('deuxieme-quine')}
                             title="Supprimer"
                           >
@@ -469,7 +537,7 @@ function App() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="gap-2 bg-purple-100 dark:bg-purple-900/30 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300"
+                            className="gap-2 bg-chart-4/10 border-chart-4/30 text-chart-4 hover:bg-chart-4/20"
                             onClick={() => editMilestonePosition('double-quine', activeManche.doubleQuineAt!, 'de la Double Quine')}
                           >
                             <span>✓ Double Quine au {activeManche.doubleQuineAt}ème</span>
@@ -477,7 +545,7 @@ function App() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0"
+                            className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
                             onClick={() => clearMilestone('double-quine')}
                             title="Supprimer"
                           >
@@ -502,7 +570,7 @@ function App() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="gap-2 bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300"
+                            className="gap-2 bg-chart-5/10 border-chart-5/30 text-chart-5 hover:bg-chart-5/20"
                             onClick={() => editMilestonePosition('carton-plein', activeManche.cartonPleinAt!, 'du Carton Plein')}
                           >
                             <span>✓ Carton Plein au {activeManche.cartonPleinAt}ème</span>
@@ -510,7 +578,7 @@ function App() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0"
+                            className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
                             onClick={() => clearMilestone('carton-plein')}
                             title="Supprimer"
                           >
@@ -529,7 +597,7 @@ function App() {
                         </Button>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2">
+                    <p className="text-xs text-muted-foreground">
                       Cliquez pour marquer un gain au numéro actuel ({activeManche.numbers.length}).
                       Une fois marqué, cliquez à nouveau sur le badge pour modifier la position.
                     </p>
@@ -552,13 +620,13 @@ function App() {
           <TabsContent value="stats" className="space-y-6">
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
+                  <div className="flex flex-col gap-1">
                     <CardTitle>
-                      Statistiques de la partie
-                      {selectedPartie && ` - ${selectedPartie.name}`}
+                      Statistiques de la
+                      {selectedPartie && ` ${selectedPartie.name}`}
                     </CardTitle>
-                    <CardDescription className="mt-1">
+                    <CardDescription>
                       {selectedPartie
                         ? `${selectedPartie.manches.length} manche(s)`
                         : 'Sélectionnez une partie pour voir ses statistiques'
@@ -609,8 +677,8 @@ function App() {
               <div className="space-y-8">
 
                 {/* Section: Statistiques clés pour le jeu */}
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <div className="flex flex-col gap-4">
+                  <h2 className="text-xl font-semibold flex items-center gap-2">
                     Analyse des Gains
                   </h2>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -634,8 +702,8 @@ function App() {
                 </div>
 
                 {/* Section: Analyse des numéros (crucial pour loto) */}
-                <div className="space-y-4 pt-4 border-t">
-                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <div className="flex flex-col gap-4 pt-4 border-t">
+                  <h2 className="text-xl font-semibold flex items-center gap-2">
                     Analyse des Numéros
                   </h2>
 
@@ -654,11 +722,11 @@ function App() {
                 </div>
 
                 {/* Section: Fréquences et tendances */}
-                <div className="space-y-4 pt-4 border-t">
-                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <div className="flex flex-col gap-4 pt-4 border-t">
+                  <h2 className="text-xl font-semibold flex items-center gap-2">
                     Fréquences et Tendances
                   </h2>
-                  <Card className="mb-6">
+                  <Card>
                     <CardContent className="pt-6 h-full">
                       <FrequencyBarChart data={stats.frequencyData} darkMode={darkMode} />
                     </CardContent>
@@ -716,13 +784,13 @@ function App() {
                       return (
                         <Card key={game.id}>
                           <CardHeader>
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                               <div className="flex-1">
-                                <CardTitle className="text-lg">
-                                  {game.name}
+                                <CardTitle className="text-lg flex items-center gap-2 flex-wrap">
+                                  <span>{game.name}</span>
                                   {game.isActive && (
-                                    <Badge className="ml-2" variant="default">
-                                      En cours
+                                    <Badge variant="default">
+                                      Active
                                     </Badge>
                                   )}
                                 </CardTitle>
@@ -731,38 +799,46 @@ function App() {
                                   {game.manches.length} manche(s) • {totalNumbersInPartie} numéros
                                 </CardDescription>
                               </div>
-                              {!game.isActive && (
+                              <div className="flex gap-2 w-full sm:w-auto">
+                                {!game.isActive && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => resumeGame(game.id)}
+                                    className="gap-2 flex-1 sm:flex-initial"
+                                  >
+                                    <Target className="h-4 w-4" />
+                                    <span>Continuer</span>
+                                  </Button>
+                                )}
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => resumeGame(game.id)}
-                                  className="gap-2"
+                                  onClick={() => deleteGame(game.id)}
+                                  className="gap-2 hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
                                 >
-                                  <Target className="h-4 w-4" />
-                                  <span className="hidden sm:inline">Continuer</span>
+                                  <Trash2 className="h-4 w-4" />
+                                  <span className="hidden sm:inline">Supprimer</span>
                                 </Button>
-                              )}
+                              </div>
                             </div>
                           </CardHeader>
                           {game.manches.length > 0 && (
                             <CardContent>
-                              <div className="text-sm text-muted-foreground">
-                                <div className="font-semibold mb-2">Manches:</div>
-                                <div className="space-y-1">
+                              <div className="text-sm text-muted-foreground flex flex-col gap-2">
+                                <div className="font-semibold">Manches:</div>
+                                <div className="space-y-3">
                                   {game.manches.map((manche) => (
-                                    <div key={manche.id} className="flex justify-between items-center">
-                                      <span>
-                                        Manche #{manche.mancheNumber}
-                                        {manche.isActive && (
-                                          <Badge className="ml-1 text-xs" variant="secondary">
-                                            En cours
-                                          </Badge>
-                                        )}
-                                      </span>
-                                      <span className="text-foreground font-medium">
-                                        {manche.numbers.length} numéros
-                                      </span>
-                                      <MancheMilestones manche={manche} darkMode={darkMode} compact />
+                                    <div key={manche.id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                                      <div className="flex items-center gap-4">
+                                        <span className={manche.isActive ? "text-green-600 dark:text-green-500 font-semibold" : ""}>
+                                          Manche #{manche.mancheNumber}
+                                        </span>
+                                        <span className="text-foreground font-medium">
+                                          {manche.numbers.length} numéros
+                                        </span>
+                                      </div>
+                                      <MancheMilestones manche={manche} compact />
                                     </div>
                                   ))}
                                 </div>
@@ -785,30 +861,30 @@ function App() {
                 <CardTitle>Paramètres</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div>
-                  <h3 className="font-semibold mb-2">Apparence</h3>
-                  <Button variant="outline" onClick={toggleTheme} className="gap-2">
+                <div className="flex flex-col gap-2">
+                  <h3 className="font-semibold">Apparence</h3>
+                  <Button variant="outline" onClick={toggleTheme} className="gap-2 w-fit">
                     {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                     Mode {darkMode ? 'Clair' : 'Sombre'}
                   </Button>
                 </div>
 
-                <div>
-                  <h3 className="font-semibold mb-2">Données</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
+                <div className="flex flex-col gap-4">
+                  <h3 className="font-semibold">Données</h3>
+                  <p className="text-sm text-muted-foreground">
                     Parties enregistrées : {globalStats.totalGamesPlayed}
                   </p>
 
                   <div className="space-y-3">
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">Exporter les données</h4>
-                      <p className="text-xs text-muted-foreground mb-2">
+                    <div className="flex flex-col gap-2">
+                      <h4 className="text-sm font-medium">Exporter les données</h4>
+                      <p className="text-xs text-muted-foreground">
                         Téléchargez toutes vos parties au format JSON pour sauvegarde ou transfert.
                       </p>
                       <Button
                         variant="outline"
                         onClick={handleExportData}
-                        className="gap-2"
+                        className="gap-2 w-fit"
                         disabled={globalStats.games.length === 0}
                       >
                         <Download className="h-4 w-4" />
@@ -816,15 +892,15 @@ function App() {
                       </Button>
                     </div>
 
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">Importer des données</h4>
-                      <p className="text-xs text-muted-foreground mb-2">
+                    <div className="flex flex-col gap-2">
+                      <h4 className="text-sm font-medium">Importer des données</h4>
+                      <p className="text-xs text-muted-foreground">
                         Importez des parties depuis un fichier JSON.
                         {globalStats.games.length > 0 && (
                           <> Les données existantes peuvent être fusionnées ou remplacées.</>
                         )}
                       </p>
-                      <div>
+                      <div className="flex flex-col gap-2">
                         <input
                           type="file"
                           accept=".json,application/json"
@@ -840,10 +916,30 @@ function App() {
                             </span>
                           </Button>
                         </label>
+                        {globalStats.games.length > 0 && (
+                          <p className="text-xs text-amber-600 dark:text-amber-500">
+                            ⚠️ Lors de l'import, vous pourrez choisir de fusionner ou remplacer vos données existantes.
+                          </p>
+                        )}
                       </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2 border-t pt-4">
+                      <h4 className="text-sm font-medium">Charger une partie démo</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Chargez une partie démo avec 4 manches complètes pour tester l'application.
+                      </p>
+                      <Button
+                        variant="outline"
+                        onClick={handleLoadDemo}
+                        className="gap-2 w-fit"
+                      >
+                        <Target className="h-4 w-4" />
+                        Charger la démo
+                      </Button>
                       {globalStats.games.length > 0 && (
-                        <p className="text-xs text-amber-600 dark:text-amber-500 mt-2">
-                          ⚠️ Lors de l'import, vous pourrez choisir de fusionner ou remplacer vos données existantes.
+                        <p className="text-xs text-amber-600 dark:text-amber-500">
+                          ⚠️ Cela remplacera toutes vos données actuelles.
                         </p>
                       )}
                     </div>
@@ -852,6 +948,7 @@ function App() {
               </CardContent>
             </Card>
           </TabsContent>
+          </MotionTabsContents>
         </Tabs>
       </main>
 
