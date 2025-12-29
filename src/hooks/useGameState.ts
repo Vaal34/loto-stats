@@ -13,6 +13,7 @@ interface UseGameStateReturn {
   startNewGame: (name?: string) => void;
   endGame: () => void;
   deleteGame: (gameId: string) => void;
+  renameGame: (gameId: string, newName: string) => void;
   resumeGame: (gameId: string) => void;
   startNewManche: () => void;
   endManche: () => void;
@@ -195,6 +196,35 @@ export function useGameState(
       }
     },
     [globalStats.games, activeGame, setGlobalStats]
+  );
+
+  /**
+   * Rename a partie
+   */
+  const renameGame = useCallback(
+    (gameId: string, newName: string) => {
+      const gameToRename = globalStats.games.find((g) => g.id === gameId);
+
+      if (!gameToRename) {
+        alert('Partie introuvable.');
+        return;
+      }
+
+      if (!newName || newName.trim() === '') {
+        alert('Le nom de la partie ne peut pas être vide.');
+        return;
+      }
+
+      setGlobalStats((prev) => ({
+        ...prev,
+        games: prev.games.map((g) =>
+          g.id === gameId
+            ? { ...g, name: newName.trim() }
+            : g
+        ),
+      }));
+    },
+    [globalStats.games, setGlobalStats]
   );
 
   /**
@@ -637,6 +667,7 @@ export function useGameState(
     startNewGame,
     endGame,
     deleteGame,
+    renameGame,
     resumeGame,
     startNewManche,
     endManche,

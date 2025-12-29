@@ -13,6 +13,7 @@ import { AUTO_SAVE_INTERVAL, STORAGE_KEY } from './constants/config';
 import { downloadJSON } from './utils/export';
 import { importFromFile } from './utils/import';
 import { useCallback } from 'react';
+import { useTutorial } from './hooks/useTutorial';
 
 // Lucide Icons
 import {
@@ -32,7 +33,9 @@ import {
   Trophy,
   Download,
   Upload,
-  Trash2
+  Trash2,
+  HelpCircle,
+  Edit2
 } from 'lucide-react';
 
 // shadcn/ui Components
@@ -62,9 +65,12 @@ import TopFlopList from './components/stats/charts/TopFlopList';
 import ColumnDistributionChart from './components/stats/charts/ColumnDistributionChart';
 import QuineTimelineChart from './components/stats/charts/QuineTimelineChart';
 import MancheMilestones from './components/parties/MancheMilestones';
+import Tutorial from './components/tutorial/Tutorial';
+import ActivateGameHint from './components/tutorial/ActivateGameHint';
 
 function App() {
   const [theme, toggleTheme] = useTheme();
+  const { showTutorial, startTutorial, closeTutorial } = useTutorial();
 
   // Global stats with localStorage
   const [globalStats, setGlobalStats, isSaved] = useLocalStorage<GlobalStats>(
@@ -80,6 +86,7 @@ function App() {
     startNewGame,
     endGame,
     deleteGame,
+    renameGame,
     resumeGame,
     startNewManche,
     endManche,
@@ -116,6 +123,9 @@ function App() {
   // Dialog states
   const [showEndMancheDialog, setShowEndMancheDialog] = useState(false);
   const [showEndGameDialog, setShowEndGameDialog] = useState(false);
+
+  // Tab state for tutorial navigation
+  const [activeTab, setActiveTab] = useState('partie');
 
   // Auto-save indicator
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
@@ -273,6 +283,20 @@ function App() {
     }
   };
 
+  const handleRenameGame = useCallback(
+    (gameId: string, currentName: string) => {
+      const newName = window.prompt(
+        'Nouveau nom de la partie :',
+        currentName
+      );
+
+      if (newName && newName.trim() !== '' && newName.trim() !== currentName) {
+        renameGame(gameId, newName);
+      }
+    },
+    [renameGame]
+  );
+
   return (
     <div className={`min-h-screen ${darkMode ? 'dark' : ''}`}>
       {/* Header */}
@@ -360,7 +384,7 @@ function App() {
 
       {/* Main Content with Tabs */}
       <main className="container px-4 py-6">
-        <Tabs defaultValue="partie" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4 h-auto">
             <TabsTrigger value="partie" className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-2 sm:py-1.5 text-xs sm:text-sm">
               <Target className="h-4 w-4 sm:h-4 sm:w-4" />
@@ -389,9 +413,22 @@ function App() {
             <Card>
               <CardHeader>
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center justify-between">
-                  <div className="flex flex-col gap-1">
-                    <CardTitle>
-                      {activeGame ? activeGame.name : 'Aucune partie active'}
+                  <div className="flex flex-col gap-1 flex-1 min-w-0">
+                    <CardTitle className="flex items-center gap-2">
+                      <span className="truncate">
+                        {activeGame ? activeGame.name : 'Aucune partie active'}
+                      </span>
+                      {activeGame && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRenameGame(activeGame.id, activeGame.name)}
+                          className="h-6 w-6 p-0 shrink-0"
+                          title="Renommer la partie"
+                        >
+                          <Edit2 className="h-3 w-3" />
+                        </Button>
+                      )}
                     </CardTitle>
                     {activeGame && (
                       <CardDescription>
@@ -753,14 +790,22 @@ function App() {
 
               </div>
             ) : (
-              <Card>
-                <CardContent className="pt-6 text-center text-muted-foreground">
-                  {selectedPartie
-                    ? 'Aucune manche enregistrée pour cette partie. Créez une nouvelle manche pour voir les statistiques.'
-                    : 'Aucune partie disponible. Créez votre première partie pour voir les statistiques.'
-                  }
-                </CardContent>
-              </Card>
+              <div className="space-y-4">
+                {!selectedPartie && globalStats.games.length > 0 ? (
+                  <ActivateGameHint
+                    onNavigateToParties={() => setActiveTab('parties')}
+                  />
+                ) : (
+                  <Card>
+                    <CardContent className="pt-6 text-center text-muted-foreground">
+                      {selectedPartie
+                        ? 'Aucune manche enregistrée pour cette partie. Créez une nouvelle manche pour voir les statistiques.'
+                        : 'Aucune partie disponible. Créez votre première partie pour voir les statistiques.'
+                      }
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             )}
           </TabsContent>
 
@@ -800,7 +845,7 @@ function App() {
                                   {game.manches.length} manche(s) • {totalNumbersInPartie} numéros
                                 </CardDescription>
                               </div>
-                              <div className="flex gap-2 w-full sm:w-auto">
+                              <div className="flex gap-2 w-full sm:w-auto flex-wrap">
                                 {!game.isActive && (
                                   <Button
                                     variant="outline"
@@ -812,6 +857,15 @@ function App() {
                                     <span>Continuer</span>
                                   </Button>
                                 )}
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleRenameGame(game.id, game.name)}
+                                  className="gap-2"
+                                >
+                                  <Edit2 className="h-4 w-4" />
+                                  <span className="hidden sm:inline">Renommer</span>
+                                </Button>
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -871,6 +925,24 @@ function App() {
                 </div>
 
                 <div className="flex flex-col gap-4">
+                  <h3 className="font-semibold">Aide</h3>
+                  <div className="flex flex-col gap-2">
+                    <h4 className="text-sm font-medium">Tutoriel interactif</h4>
+                    <p className="text-xs text-muted-foreground">
+                      Besoin d'aide pour utiliser l'application ? Lancez le tutoriel guidé.
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={startTutorial}
+                      className="gap-2 w-fit"
+                    >
+                      <HelpCircle className="h-4 w-4" />
+                      Lancer le tutoriel
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-4 border-t pt-4">
                   <h3 className="font-semibold">Données</h3>
                   <p className="text-sm text-muted-foreground">
                     Parties enregistrées : {globalStats.totalGamesPlayed}
@@ -928,7 +1000,7 @@ function App() {
                     <div className="flex flex-col gap-2 border-t pt-4">
                       <h4 className="text-sm font-medium">Charger une partie démo</h4>
                       <p className="text-xs text-muted-foreground">
-                        Chargez une partie démo avec 4 manches complètes pour tester l'application.
+                        Chargez une partie démo avec 10 réelee manches complètes pour tester l'application.
                       </p>
                       <Button
                         variant="outline"
@@ -1013,6 +1085,14 @@ function App() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Tutorial */}
+      {showTutorial && (
+        <Tutorial
+          onClose={closeTutorial}
+          onTabChange={setActiveTab}
+        />
+      )}
     </div >
   );
 }
