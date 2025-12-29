@@ -264,7 +264,8 @@ function App() {
 
     try {
       const demoData = await import('./data/demoData.json');
-      setGlobalStats(demoData.default as GlobalStats);
+      const exportData = demoData.default as { version: string; exportDate: string; stats: GlobalStats };
+      setGlobalStats(exportData.stats);
       alert('Partie démo chargée avec succès !');
     } catch (error) {
       console.error('Erreur lors du chargement de la démo:', error);
