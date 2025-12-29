@@ -12,6 +12,7 @@ interface UseGameStateReturn {
   activeManche: Manche | null;
   startNewGame: (name?: string) => void;
   endGame: () => void;
+  resumeGame: (gameId: string) => void;
   startNewManche: () => void;
   endManche: () => void;
   addNumber: (number: number) => boolean;
@@ -20,7 +21,7 @@ interface UseGameStateReturn {
   isNumberDrawn: (number: number) => boolean;
   getGameDuration: () => number | null;
   getMancheDuration: () => number | null;
-  markMilestone: (type: 'quine' | 'deuxieme-quine' | 'double-quine' | 'carton-plein') => boolean;
+  markMilestone: (type: 'quine' | 'deuxieme-quine' | 'double-quine' | 'carton-plein', position?: number) => boolean;
   clearMilestone: (type: 'quine' | 'deuxieme-quine' | 'double-quine' | 'carton-plein') => boolean;
 }
 
@@ -112,6 +113,7 @@ export function useGameState(
    */
   const endGame = useCallback(() => {
     if (!activeGame) {
+      alert('Aucune partie active à terminer.');
       return;
     }
 
@@ -137,6 +139,70 @@ export function useGameState(
     setActiveGame(null);
     setActiveManche(null);
   }, [activeGame, setGlobalStats]);
+
+  /**
+   * Resume (reactivate) an existing partie
+   */
+  const resumeGame = useCallback(
+    (gameId: string) => {
+      const gameToResume = globalStats.games.find((g) => g.id === gameId);
+
+      if (!gameToResume) {
+        alert('Partie introuvable.');
+        return;
+      }
+
+      // Check if there's already an active game
+      const existingActive = globalStats.games.find((g) => g.isActive);
+
+      if (existingActive) {
+        const confirm = window.confirm(
+          `Une partie "${existingActive.name}" est déjà en cours. Voulez-vous la terminer et reprendre "${gameToResume.name}" ?`
+        );
+
+        if (!confirm) {
+          return;
+        }
+
+        // End existing partie
+        setGlobalStats((prev) => ({
+          ...prev,
+          games: prev.games.map((g) =>
+            g.id === existingActive.id
+              ? {
+                  ...g,
+                  isActive: false,
+                  endTime: new Date().toISOString(),
+                  manches: g.manches.map((m) => ({
+                    ...m,
+                    isActive: false,
+                    endTime: m.endTime || new Date().toISOString(),
+                  })),
+                }
+              : g
+          ),
+        }));
+      }
+
+      // Reactivate the selected game
+      setGlobalStats((prev) => ({
+        ...prev,
+        games: prev.games.map((g) =>
+          g.id === gameId
+            ? {
+                ...g,
+                isActive: true,
+                endTime: undefined, // Clear end time since we're resuming
+              }
+            : g
+        ),
+      }));
+
+      setActiveGame(gameToResume);
+      setActiveManche(null);
+    },
+    [globalStats.games, setGlobalStats]
+  );
 
   /**
    * Start a new manche within the current partie
@@ -197,6 +263,7 @@ export function useGameState(
    */
   const endManche = useCallback(() => {
     if (!activeManche || !activeGame) {
+      alert('Aucune manche active à terminer.');
       return;
     }
 
@@ -226,6 +293,7 @@ export function useGameState(
     (number: number): boolean => {
       if (!activeGame) {
         console.error('No active partie');
+        alert('Erreur : Aucune partie active.');
         return false;
       }
 
@@ -234,13 +302,23 @@ export function useGameState(
         return false;
       }
 
+      // Validation: number must be between 1 and 90
       if (number < 1 || number > 90) {
         console.error('Number must be between 1 and 90');
+        alert(`Erreur : Le numéro doit être entre 1 et 90. Vous avez saisi : ${number}`);
         return false;
       }
 
+      // Validation: number must not already be drawn in this manche
       if (activeManche.numbers.includes(number)) {
         console.error(`Number ${number} already drawn in this manche`);
+        alert(`Le numéro ${number} a déjà été tiré dans cette manche.`);
+        return false;
+      }
+
+      // Safety check: warn if all 90 numbers have been drawn
+      if (activeManche.numbers.length >= 90) {
+        alert('Tous les 90 numéros ont déjà été tirés dans cette manche !');
         return false;
       }
 
@@ -401,19 +479,27 @@ export function useGameState(
   }, [activeManche]);
 
   /**
-   * Mark a milestone at the current position
+   * Mark a milestone at the current position or at a specific position
    */
   const markMilestone = useCallback(
-    (type: 'quine' | 'deuxieme-quine' | 'double-quine' | 'carton-plein'): boolean => {
+    (type: 'quine' | 'deuxieme-quine' | 'double-quine' | 'carton-plein', position?: number): boolean => {
       if (!activeGame || !activeManche) {
         console.error('No active game or manche');
+        alert('Erreur : Aucune partie ou manche active.');
         return false;
       }
 
-      const currentPosition = activeManche.numbers.length;
-      
-      if (currentPosition === 0) {
-        alert('Aucun numéro tiré. Tirez au moins un numéro avant de marquer un milestone.');
+      // Use provided position or current position
+      const targetPosition = position !== undefined ? position : activeManche.numbers.length;
+
+      if (targetPosition === 0) {
+        alert('Position invalide. La position doit être au moins 1.');
+        return false;
+      }
+
+      // Validate position is within bounds
+      if (targetPosition > activeManche.numbers.length) {
+        alert(`Position invalide. Maximum actuel: ${activeManche.numbers.length}`);
         return false;
       }
 
@@ -425,9 +511,10 @@ export function useGameState(
         'carton-plein': 'cartonPleinAt',
       };
       const fieldName = fieldNameMap[type];
-      
-      if (activeManche[fieldName]) {
-        alert(`Ce milestone a déjà été marqué au numéro ${activeManche[fieldName]}.`);
+
+      if (activeManche[fieldName] && position === undefined) {
+        // Only alert if marking at current position (not retroactive edit)
+        alert(`Ce gain a déjà été marqué au ${activeManche[fieldName]}ème numéro.`);
         return false;
       }
 
@@ -439,7 +526,7 @@ export function useGameState(
                 ...g,
                 manches: g.manches.map((m) =>
                   m.id === activeManche.id
-                    ? { ...m, [fieldName]: currentPosition }
+                    ? { ...m, [fieldName]: targetPosition }
                     : m
                 ),
               }
@@ -497,6 +584,7 @@ export function useGameState(
     activeManche,
     startNewGame,
     endGame,
+    resumeGame,
     startNewManche,
     endManche,
     addNumber,

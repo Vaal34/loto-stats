@@ -71,12 +71,12 @@ const NumberGrid: React.FC<NumberGridProps> = ({
               aria-label={`Number ${number}${isDrawn ? ' (drawn)' : ''}. Total occurrences: ${frequency}`}
               aria-pressed={isDrawn}
             >
-              <div className="flex flex-col items-center justify-center h-full">
-                <span>{number}</span>
+              <div className="flex flex-col items-center justify-center h-full w-full">
+                <span className="leading-none">{number}</span>
                 {frequency > 0 && (
                   <span
                     className={cn(
-                      'absolute top-0.5 right-0.5 text-[8px] sm:text-[9px] font-semibold px-1 rounded-full',
+                      'absolute bottom-0 right-0 text-[7px] sm:text-[8px] font-bold px-0.5 sm:px-1 py-0 sm:py-0.5 rounded-tl rounded-br leading-tight min-w-[12px] sm:min-w-[14px] text-center',
                       getBadgeColorClass(frequency)
                     )}
                     aria-label={`Drawn ${frequency} times`}

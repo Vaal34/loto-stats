@@ -12,6 +12,7 @@ import { initializeGlobalStats, saveGlobalStats } from './utils/storage';
 import { AUTO_SAVE_INTERVAL, STORAGE_KEY } from './constants/config';
 import { downloadJSON } from './utils/export';
 import { importFromFile } from './utils/import';
+import { useCallback } from 'react';
 
 // Lucide Icons
 import {
@@ -38,6 +39,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 // Components
 import NumberGrid from './components/game/NumberGrid';
@@ -67,6 +78,7 @@ function App() {
     activeManche,
     startNewGame,
     endGame,
+    resumeGame,
     startNewManche,
     endManche,
     addNumber,
@@ -98,6 +110,10 @@ function App() {
 
   // Statistics for selected partie
   const stats = useStats(selectedPartie);
+
+  // Dialog states
+  const [showEndMancheDialog, setShowEndMancheDialog] = useState(false);
+  const [showEndGameDialog, setShowEndGameDialog] = useState(false);
 
   // Auto-save indicator
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
@@ -132,7 +148,60 @@ function App() {
     }
   };
 
+  // Calculate frequency for current partie (not all-time)
+  const currentPartieFrequency = useMemo(() => {
+    if (!activeGame) {
+      return {};
+    }
+
+    const frequency: Record<number, number> = {};
+    activeGame.manches.forEach((manche) => {
+      manche.numbers.forEach((num) => {
+        frequency[num] = (frequency[num] || 0) + 1;
+      });
+    });
+
+    return frequency;
+  }, [activeGame]);
+
   const darkMode = theme === 'dark';
+
+  // Helper to edit milestone position with prompt
+  const editMilestonePosition = useCallback(
+    (
+      type: 'quine' | 'deuxieme-quine' | 'double-quine' | 'carton-plein',
+      currentPosition: number,
+      label: string
+    ) => {
+      if (!activeManche) return;
+
+      const position = window.prompt(
+        `Modifier la position ${label} (actuellement au ${currentPosition}ème numéro) :\n\nEntrez une position entre 1 et ${activeManche.numbers.length} :`,
+        currentPosition.toString()
+      );
+
+      if (position) {
+        const pos = parseInt(position, 10);
+        if (!isNaN(pos) && pos >= 1 && pos <= activeManche.numbers.length) {
+          markMilestone(type, pos);
+        } else {
+          alert(`Position invalide. Doit être entre 1 et ${activeManche.numbers.length}`);
+        }
+      }
+    },
+    [activeManche, markMilestone]
+  );
+
+  // Handlers for dialog confirmations
+  const handleEndMancheConfirm = useCallback(() => {
+    endManche();
+    setShowEndMancheDialog(false);
+  }, [endManche]);
+
+  const handleEndGameConfirm = useCallback(() => {
+    endGame();
+    setShowEndGameDialog(false);
+  }, [endGame]);
 
   // Handle file import
   const handleImportFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -276,7 +345,7 @@ function App() {
                           <Plus className="h-4 w-4" />
                           <span>Nouvelle Manche</span>
                         </Button>
-                        <Button variant="destructive" onClick={endGame} className="gap-2 text-xs sm:text-sm">
+                        <Button variant="destructive" onClick={() => setShowEndGameDialog(true)} className="gap-2 text-xs sm:text-sm">
                           <Square className="h-4 w-4" />
                           <span>Terminer Partie</span>
                         </Button>
@@ -288,11 +357,11 @@ function App() {
                           <Undo2 className="h-4 w-4" />
                           <span>Annuler</span>
                         </Button>
-                        <Button variant="secondary" onClick={endManche} className="gap-2 text-xs sm:text-sm">
+                        <Button variant="secondary" onClick={() => setShowEndMancheDialog(true)} className="gap-2 text-xs sm:text-sm">
                           <Square className="h-4 w-4" />
                           <span>Fin Manche</span>
                         </Button>
-                        <Button variant="destructive" onClick={endGame} className="gap-2 text-xs sm:text-sm">
+                        <Button variant="destructive" onClick={() => setShowEndGameDialog(true)} className="gap-2 text-xs sm:text-sm">
                           <Square className="h-4 w-4" />
                           <span className="hidden sm:inline">Terminer Partie</span>
                           <span className="sm:hidden">Fin</span>
@@ -330,15 +399,25 @@ function App() {
                     <div className="flex flex-wrap gap-2">
                       {/* Quine Button */}
                       {activeManche.quineAt ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-2 bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300"
-                          onClick={() => clearMilestone('quine')}
-                        >
-                          <span>✓ Quine au {activeManche.quineAt}ème</span>
-                          <span className="text-xs">×</span>
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-2 bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300"
+                            onClick={() => editMilestonePosition('quine', activeManche.quineAt!, 'de la Quine')}
+                          >
+                            <span>✓ Quine au {activeManche.quineAt}ème</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={() => clearMilestone('quine')}
+                            title="Supprimer"
+                          >
+                            <span className="text-xs">×</span>
+                          </Button>
+                        </div>
                       ) : (
                         <Button
                           variant="outline"
@@ -353,15 +432,25 @@ function App() {
 
                       {/* 2ème Quine Button */}
                       {activeManche.deuxiemeQuineAt ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-2 bg-indigo-100 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300"
-                          onClick={() => clearMilestone('deuxieme-quine')}
-                        >
-                          <span>✓ 2ème Quine au {activeManche.deuxiemeQuineAt}ème</span>
-                          <span className="text-xs">×</span>
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-2 bg-indigo-100 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300"
+                            onClick={() => editMilestonePosition('deuxieme-quine', activeManche.deuxiemeQuineAt!, 'de la 2ème Quine')}
+                          >
+                            <span>✓ 2ème Quine au {activeManche.deuxiemeQuineAt}ème</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={() => clearMilestone('deuxieme-quine')}
+                            title="Supprimer"
+                          >
+                            <span className="text-xs">×</span>
+                          </Button>
+                        </div>
                       ) : (
                         <Button
                           variant="outline"
@@ -376,15 +465,25 @@ function App() {
 
                       {/* Double Quine Button */}
                       {activeManche.doubleQuineAt ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-2 bg-purple-100 dark:bg-purple-900/30 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300"
-                          onClick={() => clearMilestone('double-quine')}
-                        >
-                          <span>✓ Double Quine au {activeManche.doubleQuineAt}ème</span>
-                          <span className="text-xs">×</span>
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-2 bg-purple-100 dark:bg-purple-900/30 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300"
+                            onClick={() => editMilestonePosition('double-quine', activeManche.doubleQuineAt!, 'de la Double Quine')}
+                          >
+                            <span>✓ Double Quine au {activeManche.doubleQuineAt}ème</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={() => clearMilestone('double-quine')}
+                            title="Supprimer"
+                          >
+                            <span className="text-xs">×</span>
+                          </Button>
+                        </div>
                       ) : (
                         <Button
                           variant="outline"
@@ -399,15 +498,25 @@ function App() {
 
                       {/* Carton Plein Button */}
                       {activeManche.cartonPleinAt ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-2 bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300"
-                          onClick={() => clearMilestone('carton-plein')}
-                        >
-                          <span>✓ Carton Plein au {activeManche.cartonPleinAt}ème</span>
-                          <span className="text-xs">×</span>
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-2 bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300"
+                            onClick={() => editMilestonePosition('carton-plein', activeManche.cartonPleinAt!, 'du Carton Plein')}
+                          >
+                            <span>✓ Carton Plein au {activeManche.cartonPleinAt}ème</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={() => clearMilestone('carton-plein')}
+                            title="Supprimer"
+                          >
+                            <span className="text-xs">×</span>
+                          </Button>
+                        </div>
                       ) : (
                         <Button
                           variant="outline"
@@ -421,7 +530,8 @@ function App() {
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground mt-2">
-                      Cliquez pour indiquer qu'un gain a été remporté au numéro actuel ({activeManche.numbers.length})
+                      Cliquez pour marquer un gain au numéro actuel ({activeManche.numbers.length}).
+                      Une fois marqué, cliquez à nouveau sur le badge pour modifier la position.
                     </p>
                   </div>
                 </CardContent>
@@ -432,7 +542,7 @@ function App() {
             <NumberGrid
               onNumberClick={handleNumberClick}
               drawnNumbers={activeManche?.numbers || []}
-              allTimeFrequency={globalStats.allTimeFrequency}
+              allTimeFrequency={currentPartieFrequency}
               isActive={!!activeManche}
               darkMode={darkMode}
             />
@@ -607,7 +717,7 @@ function App() {
                         <Card key={game.id}>
                           <CardHeader>
                             <div className="flex items-center justify-between">
-                              <div>
+                              <div className="flex-1">
                                 <CardTitle className="text-lg">
                                   {game.name}
                                   {game.isActive && (
@@ -621,6 +731,17 @@ function App() {
                                   {game.manches.length} manche(s) • {totalNumbersInPartie} numéros
                                 </CardDescription>
                               </div>
+                              {!game.isActive && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => resumeGame(game.id)}
+                                  className="gap-2"
+                                >
+                                  <Target className="h-4 w-4" />
+                                  <span className="hidden sm:inline">Continuer</span>
+                                </Button>
+                              )}
                             </div>
                           </CardHeader>
                           {game.manches.length > 0 && (
@@ -733,6 +854,67 @@ function App() {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* End Manche Confirmation Dialog */}
+      <AlertDialog open={showEndMancheDialog} onOpenChange={setShowEndMancheDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Terminer la manche ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Vous êtes sur le point de terminer la manche #{activeManche?.mancheNumber}.
+              {activeManche && (
+                <div className="mt-2 space-y-1">
+                  <p className="font-medium">Résumé :</p>
+                  <ul className="list-disc list-inside text-sm">
+                    <li>{activeManche.numbers.length} numéros tirés</li>
+                    {activeManche.quineAt && <li>Quine au {activeManche.quineAt}ème</li>}
+                    {activeManche.deuxiemeQuineAt && <li>2ème Quine au {activeManche.deuxiemeQuineAt}ème</li>}
+                    {activeManche.doubleQuineAt && <li>Double Quine au {activeManche.doubleQuineAt}ème</li>}
+                    {activeManche.cartonPleinAt && <li>Carton Plein au {activeManche.cartonPleinAt}ème</li>}
+                  </ul>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleEndMancheConfirm}>
+              Terminer la manche
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* End Game Confirmation Dialog */}
+      <AlertDialog open={showEndGameDialog} onOpenChange={setShowEndGameDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Terminer la partie ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Vous êtes sur le point de terminer la partie "{activeGame?.name}".
+              {activeGame && (
+                <div className="mt-2 space-y-1">
+                  <p className="font-medium">Résumé :</p>
+                  <ul className="list-disc list-inside text-sm">
+                    <li>{activeGame.manches.length} manche(s) jouée(s)</li>
+                    {activeManche && activeManche.numbers.length > 0 && (
+                      <li className="text-amber-600 dark:text-amber-500">
+                        ⚠️ Manche #{activeManche.mancheNumber} en cours avec {activeManche.numbers.length} numéro(s) sera également terminée
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleEndGameConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Terminer la partie
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div >
   );
 }

@@ -18,7 +18,7 @@ export interface QuineStats {
   totalCartonPleins: number;
   fastestQuine: number | null;
   slowestQuine: number | null;
-  fatestDeuxiemeQuine: number | null;
+  fastestDeuxiemeQuine: number | null;
   slowestDeuxiemeQuine: number | null;
   fastestDoubleQuine: number | null;
   slowestDoubleQuine: number | null;
